@@ -1,0 +1,32 @@
+{
+  "name": "@fon/ui",
+  "version": "0.0.0",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./src/*"
+      ]
+    }
+  },
+  "dependencies": {
+    "@codemirror/commands": "^6.8.1",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/view": "^6.38.1",
+    "@zag-js/date-picker": "^1.21.9",
+    "@zag-js/i18n-utils": "^1.21.9",
+    "@zag-js/menu": "^1.21.9",
+    "@zag-js/scroll-area": "^1.21.9",
+    "@zag-js/vue": "^1.21.9",
+    "dayjs": "catalog:",
+    "lodash-es": "catalog:",
+    "vditor": "^3.11.1",
+    "vue": "catalog:"
+  },
+  "devDependencies": {
+    "@fon/uno-preset": "workspace:*",
+    "@vue/tsconfig": "catalog:"
+  }
+}

@@ -1,0 +1,14 @@
+max_width = 100 # 最大行宽
+hard_tabs = false # 是否使用硬制表符Tab
+tab_spaces = 4 # Tab的空格数
+newline_style = "Auto" # 换行风格，可选：Auto、Unix、Windows
+use_small_heuristics = "Default" # 是否使用小型启发式，可选：Default、Always、Never
+reorder_imports = true # 是否对导入进行排序
+reorder_modules = true # 是否对模块进行排序
+remove_nested_parens = true # 是否移除嵌套括号
+edition = "2021" # Rust版本，可选：2015、2018、2021
+merge_derives = true # 是否合并derive宏
+use_try_shorthand = false # 是否使用try!宏的简写形式
+use_field_init_shorthand = false # 是否使用字段初始化的简写形式
+force_explicit_abi = true # 是否强制显式指定函数的ABI
+imports_granularity = "Crate" # 导入的粒度，可选：Crate、Module、Item
