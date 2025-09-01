@@ -111,6 +111,9 @@ importers:
       '@codemirror/view':
         specifier: ^6.38.1
         version: 6.38.2
+      '@zag-js/collapsible':
+        specifier: ^1.22.1
+        version: 1.22.1
       '@zag-js/date-picker':
         specifier: ^1.21.9
         version: 1.22.1(@internationalized/date@3.8.2)
@@ -2588,6 +2591,9 @@ packages:
 
   '@zag-js/anatomy@1.22.1':
     resolution: {integrity: sha512-I5OvOuJBt6hEqbpqVkWCOEoDfGMnKuLx+S0h7Un5SyAwnif3F1dSqDYujU28bCy8FtKs36vsq/izxufXyiXSEg==}
+
+  '@zag-js/collapsible@1.22.1':
+    resolution: {integrity: sha512-vKfDe/fzm3ndDfaueqW/XgGaWCHVD8MuLFtRRyv3jX3ubdNYn5R/j7ftQURdYyqRlPI3Si50FWSAtOqtvs4y9Q==}
 
   '@zag-js/core@1.22.1':
     resolution: {integrity: sha512-4BNrwO9Tadq2Z0d2xSSQs4O/o3OarEHzXM2FQqx46vrwSE57qUghnZex429ZQ51fuk8AL5Lowt26a9JxE9sVPg==}
@@ -7982,6 +7988,7 @@ snapshots:
   '@types/node@24.3.0':
     dependencies:
       undici-types: 7.10.0
+    optional: true
 
   '@types/normalize-package-data@2.4.4': {}
 
@@ -8842,6 +8849,14 @@ snapshots:
   '@xtuc/long@4.2.2': {}
 
   '@zag-js/anatomy@1.22.1': {}
+
+  '@zag-js/collapsible@1.22.1':
+    dependencies:
+      '@zag-js/anatomy': 1.22.1
+      '@zag-js/core': 1.22.1
+      '@zag-js/dom-query': 1.22.1
+      '@zag-js/types': 1.22.1
+      '@zag-js/utils': 1.22.1
 
   '@zag-js/core@1.22.1':
     dependencies:
@@ -10553,7 +10568,7 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 24.3.0
+      '@types/node': 22.18.0
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
@@ -12493,7 +12508,8 @@ snapshots:
 
   undici-types@6.21.0: {}
 
-  undici-types@7.10.0: {}
+  undici-types@7.10.0:
+    optional: true
 
   unenv@2.0.0-rc.19:
     dependencies:

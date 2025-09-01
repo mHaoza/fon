@@ -2,6 +2,7 @@
 import { ScrollArea } from '@fon/ui'
 import AddInput from './modules/add-input.vue'
 import TodoDetail from './modules/todo-detail.vue'
+import TodoFilter from './modules/todo-filter.vue'
 import TodoList from './modules/todo-list.vue'
 
 useHead({
@@ -17,9 +18,7 @@ const todoListRef = useTemplateRef('todoListRef')
     <TitleBar />
 
     <div class="p-4 flex h-full overflow-hidden">
-      <!-- <div class="w-56">
-        筛选器
-      </div> -->
+      <TodoFilter />
       <div class="todo-list flex flex-col flex-1 h-full">
         <AddInput @add="todoListRef?.refresh()" />
 
