@@ -5,12 +5,7 @@ import TodoDetail from './modules/todo-detail.vue'
 import TodoFilter from './modules/todo-filter.vue'
 import TodoList from './modules/todo-list.vue'
 
-useHead({
-  title: 'Fon-main',
-})
-
-const activeTodo = ref<string | null>(null)
-const todoListRef = useTemplateRef('todoListRef')
+useHead({ title: 'Fon-main' })
 </script>
 
 <template>
@@ -20,14 +15,14 @@ const todoListRef = useTemplateRef('todoListRef')
     <div class="p-4 flex h-full overflow-hidden">
       <TodoFilter />
       <div class="todo-list flex flex-col flex-1 h-full">
-        <AddInput @add="todoListRef?.refresh()" />
+        <AddInput />
 
         <ScrollArea>
-          <TodoList ref="todoListRef" v-model:active-todo="activeTodo" />
+          <TodoList />
         </ScrollArea>
       </div>
       <div class="todo-item-content w-1/2">
-        <TodoDetail :todo-id="activeTodo" @update="todoListRef?.refresh()" />
+        <TodoDetail />
       </div>
     </div>
   </div>

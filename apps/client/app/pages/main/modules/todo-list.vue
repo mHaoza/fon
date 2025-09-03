@@ -2,21 +2,16 @@
 import type { ContextMenuItem } from '@fon/ui'
 import type { Todo } from '@/types'
 import { ContextMenu, TodoInput } from '@fon/ui'
-import { computed, nextTick, ref, useTemplateRef } from 'vue'
-import { fetchGetTodoList, fetchUpdateTodo } from '~/services/todo'
+import { nextTick, ref, useTemplateRef } from 'vue'
+import { useTodoStore } from '~/store/todo'
 
 const todoInputRefs = useTemplateRef('todoInputRef')
 
-const { data: allTodos, refresh } = useAsyncData('todoList', fetchGetTodoList, { default: () => [] })
-const todoList = computed(() => allTodos.value?.filter(todo => !todo.is_deleted) || [])
-const activeTodo = defineModel<string | null>('activeTodo', { default: null })
+const todoStore = useTodoStore()
 const focusedTodo = ref<string | null>(null)
 
 function setActiveTodo(todo: Todo, cursorPos?: number) {
-  if (focusedTodo.value === todo.id) {
-    return
-  }
-  activeTodo.value = todo.id
+  todoStore.activeTodoId = todo.id
   focusedTodo.value = todo.id
   cursorPos = cursorPos ?? todo.title.length
   nextTick(() => {
@@ -33,7 +28,7 @@ function handleTodoClick(e: MouseEvent, todo: Todo) {
 
 async function updateTodoStatus(todo: Todo) {
   try {
-    await fetchUpdateTodo({ id: todo.id, is_done: todo.is_done })
+    await todoStore.updateTodo({ id: todo.id, is_done: todo.is_done })
   }
   catch (error) {
     console.error('Failed to update todo status:', error)
@@ -44,7 +39,7 @@ async function updateTodoStatus(todo: Todo) {
 
 async function updateTodoTitle(todo: Todo) {
   try {
-    await fetchUpdateTodo({ id: todo.id, title: todo.title })
+    await todoStore.updateTodo({ id: todo.id, title: todo.title })
     focusedTodo.value = null
   }
   catch (error) {
@@ -54,9 +49,8 @@ async function updateTodoTitle(todo: Todo) {
 
 async function deleteTodo(todo: Todo) {
   try {
-    await fetchUpdateTodo({ id: todo.id, is_deleted: true })
-    await refresh()
-    activeTodo.value = null
+    await todoStore.updateTodo({ id: todo.id, is_deleted: true })
+    todoStore.activeTodoId = null
   }
   catch (error) {
     console.error('Failed to delete todo:', error)
@@ -74,20 +68,18 @@ function getContextMenuItems(todo: Todo): ContextMenuItem[] {
     },
   ]
 }
-
-defineExpose({ refresh })
 </script>
 
 <template>
   <div class="todo-list">
     <ContextMenu
-      v-for="(todo) in todoList"
+      v-for="(todo) in todoStore.todoList"
       :key="todo.id"
       :items="getContextMenuItems(todo)"
     >
       <div
         class="todo-input px-3 rounded-md flex h-9 shadow-xs items-center relative"
-        :class="activeTodo === todo.id ? 'bg-gray-100' : 'hover:bg-gray-100/70'"
+        :class="todoStore.activeTodoId === todo.id ? 'bg-gray-100' : 'hover:bg-gray-100/70'"
         @click="handleTodoClick($event, todo)"
         @contextmenu="handleTodoClick($event, todo)"
       >

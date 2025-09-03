@@ -3,12 +3,9 @@ import type { CreateTodo } from '@/types'
 // import DatePicker from '@/components/DatePicker'
 import { TodoInput } from '@fon/ui'
 import { ref, useTemplateRef } from 'vue'
-import { fetchAddTodo } from '~/services/todo'
+import { useTodoStore } from '~/store/todo'
 
-const emit = defineEmits<{
-  (e: 'add'): void
-}>()
-
+const todoStore = useTodoStore()
 const todoInput = useTemplateRef('todoInput')
 const todo = ref<CreateTodo>(getDefaultTodoData())
 
@@ -60,8 +57,7 @@ async function addTodo() {
       tags: [...new Set([...todo.value.tags, ...tags])], // Merge and deduplicate tags
     }
 
-    await fetchAddTodo(todoData)
-    emit('add')
+    await todoStore.addTodo(todoData)
     todo.value = getDefaultTodoData()
   }
   catch (error) {
