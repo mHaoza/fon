@@ -1,6 +1,6 @@
 {
   "name": "@fon/uno-preset",
-  "version": "0.0.0",
+  "version": "0.0.1-beta.1",
   "exports": {
     ".": "./src/index.ts"
   },
