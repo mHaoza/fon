@@ -6,15 +6,17 @@ import { computed, useId } from 'vue'
 const props = withDefaults(
   defineProps<{
     title?: string
+    defaultOpen?: boolean
   }>(),
   {
     title: '',
+    defaultOpen: false,
   },
 )
 
 const service = useMachine(collapsible.machine, {
   id: useId(),
-  defaultOpen: true,
+  defaultOpen: props.defaultOpen,
 })
 
 const api = computed(() => collapsible.connect(service, normalizeProps))
@@ -24,8 +26,8 @@ const api = computed(() => collapsible.connect(service, normalizeProps))
   <div v-bind="api.getRootProps()">
     <button v-bind="api.getTriggerProps()" class="w-full">
       <slot name="trigger">
-        <div class="text-gray-500 p-1 rounded-md i-flex-y-center h-7 w-full hover:bg-gray-300/30">
-          <span class="i-mdi-chevron-right inline-block" :class="{ 'rotate-90': api.open }" />
+        <div class="group text-gray-500 p-1 rounded-md i-flex-y-center h-7 w-full hover:bg-gray-100">
+          <span class="i-mdi-chevron-right opacity-0 inline-block group-hover:opacity-100" :class="{ 'rotate-90': api.open }" />
           <span class="text-xs">{{ props.title }}</span>
           <div class="trigger-extra i-flex-center">
             <slot name="trigger-extra" />

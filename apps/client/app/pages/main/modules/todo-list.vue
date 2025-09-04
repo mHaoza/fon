@@ -79,7 +79,7 @@ function getContextMenuItems(todo: Todo): ContextMenuItem[] {
     >
       <div
         class="todo-input px-3 rounded-md flex h-9 shadow-xs items-center relative"
-        :class="todoStore.activeTodoId === todo.id ? 'bg-gray-100' : 'hover:bg-gray-100/70'"
+        :class="todoStore.activeTodoId === todo.id ? 'bg-gray-100' : 'hover:bg-gray-100/50'"
         @click="handleTodoClick($event, todo)"
         @contextmenu="handleTodoClick($event, todo)"
       >
