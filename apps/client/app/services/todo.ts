@@ -2,7 +2,7 @@ import type { CreateTodo, Todo } from '~/types'
 import { invoke } from '@tauri-apps/api/core'
 
 export async function fetchGetTodoList() {
-  const todoList = await invoke('get_all_todos') as Todo[]
+  const todoList = await invoke('get_todo_list') as Todo[]
   return todoList
 }
 

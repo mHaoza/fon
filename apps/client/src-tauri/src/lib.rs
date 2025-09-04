@@ -36,7 +36,7 @@ pub fn run() {
             // 注册web端调用rust端方法
             cmds::greet,
             cmds::add_todo,
-            cmds::get_all_todos,
+            cmds::get_todo_list,
             cmds::get_todo_by_id,
             cmds::update_todo,
             cmds::delete_todo,

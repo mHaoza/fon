@@ -35,11 +35,12 @@ impl TodoSchema {
         Ok(())
     }
 
-    pub fn find_all(conn: &Connection) -> Result<Vec<Todo>> {
-        let mut stmt = conn.prepare(
+    // 查除了已删除之外的所有的 todo
+    pub fn find_todo_list(con: &Connection) -> Result<Vec<Todo>> {
+        let mut stmt = con.prepare(
             "SELECT id, title, date, repeat, end_repeat_type, end_repeat_date, 
                     remaining_count, content, category, is_done, is_deleted, created_at, updated_at 
-             FROM todos ORDER BY created_at DESC",
+             FROM todos WHERE is_deleted = 0 ORDER BY created_at DESC",
         )?;
 
         let todo_iter = stmt.query_map([], |row| {
@@ -51,7 +52,7 @@ impl TodoSchema {
         for todo_result in todo_iter {
             let mut todo = todo_result?;
             // 获取标签
-            todo.tags = Self::get_todo_tags(conn, &todo.id)?;
+            todo.tags = Self::get_todo_tags(con, &todo.id)?;
             todos.push(todo);
         }
 

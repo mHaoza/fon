@@ -22,9 +22,9 @@ impl TodoRepository {
         Ok(todo)
     }
 
-    pub fn get_all_todos(&self) -> Result<Vec<Todo>> {
+    pub fn get_todo_list(&self) -> Result<Vec<Todo>> {
         let conn = self.db.get_connection();
-        let todos = TodoSchema::find_all(&conn)?;
+        let todos = TodoSchema::find_todo_list(&conn)?;
         Ok(todos)
     }
 

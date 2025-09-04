@@ -23,9 +23,9 @@ pub async fn add_todo(
 }
 
 #[tauri::command]
-pub async fn get_all_todos(db: State<'_, Arc<Database>>) -> Result<Value, String> {
+pub async fn get_todo_list(db: State<'_, Arc<Database>>) -> Result<Value, String> {
     let repository = TodoRepository::new(db.inner().clone());
-    let todos = repository.get_all_todos().map_err(|e| e.to_string())?;
+    let todos = repository.get_todo_list().map_err(|e| e.to_string())?;
     Ok(serde_json::to_value(todos).map_err(|e| e.to_string())?)
 }
 
