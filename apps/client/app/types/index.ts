@@ -16,3 +16,10 @@ export interface Todo {
 }
 
 export type CreateTodo = Omit<Todo, 'id' | 'created_at' | 'updated_at'>
+
+export interface Tag {
+  id: string
+  name: string
+  created_at: number
+  use_count: number
+}

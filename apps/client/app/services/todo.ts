@@ -1,13 +1,13 @@
-import type { CreateTodo, Todo } from '~/types'
+import type { CreateTodo, Tag, Todo } from '~/types'
 import { invoke } from '@tauri-apps/api/core'
 
-export async function fetchGetTodoList() {
-  const todoList = await invoke('get_todo_list') as Todo[]
+export async function fetchGetTodoList(data: { tag?: string }) {
+  const todoList = await invoke('get_todo_list', data) as Todo[]
   return todoList
 }
 
 export async function fetchGetTagList() {
-  const tagList = await invoke('get_all_tags') as string[]
+  const tagList = await invoke('get_tag_list') as Tag[]
   return tagList
 }
 

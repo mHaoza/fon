@@ -54,6 +54,7 @@ pub struct Tag {
     pub id: String,
     pub name: String,
     pub created_at: i64,
+    pub use_count: i32,
 }
 
 impl Todo {
@@ -93,6 +94,7 @@ impl Tag {
             id: uuid::Uuid::new_v4().to_string(),
             name,
             created_at: now,
+            use_count: 0, // 这个字段不会存储到数据库，只在查询时动态计算
         }
     }
 }

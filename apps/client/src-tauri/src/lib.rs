@@ -40,7 +40,7 @@ pub fn run() {
             cmds::get_todo_by_id,
             cmds::update_todo,
             cmds::delete_todo,
-            cmds::get_all_tags,
+            cmds::get_tag_list,
         ]);
 
     let app = builder

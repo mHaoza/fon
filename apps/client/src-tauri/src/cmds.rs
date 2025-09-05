@@ -23,9 +23,16 @@ pub async fn add_todo(
 }
 
 #[tauri::command]
-pub async fn get_todo_list(db: State<'_, Arc<Database>>) -> Result<Value, String> {
+pub async fn get_todo_list(tag: Option<String>, db: State<'_, Arc<Database>>) -> Result<Value, String> {
     let repository = TodoRepository::new(db.inner().clone());
-    let todos = repository.get_todo_list().map_err(|e| e.to_string())?;
+    let todos = match tag {
+        Some(tag_name) if !tag_name.is_empty() => {
+            repository.get_todo_list_by_tag(&tag_name).map_err(|e| e.to_string())?
+        }
+        _ => {
+            repository.get_todo_list().map_err(|e| e.to_string())?
+        }
+    };
     Ok(serde_json::to_value(todos).map_err(|e| e.to_string())?)
 }
 
@@ -56,8 +63,8 @@ pub async fn delete_todo(id: String, db: State<'_, Arc<Database>>) -> Result<(),
 }
 
 #[tauri::command]
-pub async fn get_all_tags(db: State<'_, Arc<Database>>) -> Result<Value, String> {
+pub async fn get_tag_list(db: State<'_, Arc<Database>>) -> Result<Value, String> {
     let repository = TodoRepository::new(db.inner().clone());
-    let tags = repository.get_all_tags().map_err(|e| e.to_string())?;
+    let tags = repository.get_tag_list().map_err(|e| e.to_string())?;
     Ok(serde_json::to_value(tags).map_err(|e| e.to_string())?)
 }

@@ -1,20 +1,28 @@
 <script lang="ts" setup>
 import { Collapsible, SidebarGroup } from '@fon/ui'
+import { useTodoStore } from '~/store/todo'
 
-const activeTag = ref('')
-const tagOptions = [
-  { label: '1111111111', value: '1111111111', icon: 'i-mdi:tag-outline' },
-  { label: '222222', value: '222222', icon: 'i-mdi:tag-outline' },
-  { label: '333333333', value: '333333333', icon: 'i-mdi:tag-outline' },
-  { label: '44444444', value: '44444444', icon: 'i-mdi:tag-outline' },
-  { label: '555555555', value: '555555555', icon: 'i-mdi:tag-outline' },
-]
+const todoStore = useTodoStore()
+
+const tagList = computed(() => todoStore.tagList.map(item => ({
+  label: item.name,
+  value: `tag:${item.name}`,
+  icon: 'i-mdi-tag-outline',
+  filterInfo: {
+    activeKey: `tag:${item.name}`,
+    params: { tag: item.name },
+  },
+})))
 </script>
 
 <template>
   <div>
     <Collapsible title="标签" default-open>
-      <SidebarGroup v-model:value="activeTag" :options="tagOptions" />
+      <SidebarGroup v-model:value="todoStore.filterInfo.activeKey" :options="tagList" @change="todoStore.filterInfo.params = $event.filterInfo.params">
+        <template #extra="{ option }">
+          <div class="rounded-full h-3 w-3" :style="{ backgroundColor: getTagColor(option.label) }" />
+        </template>
+      </SidebarGroup>
     </Collapsible>
   </div>
 </template>

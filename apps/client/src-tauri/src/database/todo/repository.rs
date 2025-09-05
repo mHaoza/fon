@@ -1,6 +1,6 @@
 use crate::database::todo::schema::{TagSchema, TodoSchema};
 use crate::database::{
-    todo::{CreateTodo, Todo, UpdateTodo},
+    todo::{CreateTodo, Tag, Todo, UpdateTodo},
     Database,
 };
 use anyhow::Result;
@@ -28,6 +28,12 @@ impl TodoRepository {
         Ok(todos)
     }
 
+    pub fn get_todo_list_by_tag(&self, tag_name: &str) -> Result<Vec<Todo>> {
+        let conn = self.db.get_connection();
+        let todos = TodoSchema::find_todo_list_by_tag(&conn, tag_name)?;
+        Ok(todos)
+    }
+
     pub fn get_todo_by_id(&self, id: &str) -> Result<Option<Todo>> {
         let conn = self.db.get_connection();
         let todo = TodoSchema::find_by_id(&conn, id)?;
@@ -46,9 +52,9 @@ impl TodoRepository {
         Ok(())
     }
 
-    pub fn get_all_tags(&self) -> Result<Vec<String>> {
+    pub fn get_tag_list(&self) -> Result<Vec<Tag>> {
         let conn = self.db.get_connection();
-        let tags = TagSchema::get_all_tags(&conn)?;
+        let tags = TagSchema::get_tag_list(&conn)?;
         Ok(tags)
     }
 }

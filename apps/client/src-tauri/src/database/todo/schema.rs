@@ -59,6 +59,34 @@ impl TodoSchema {
         Ok(todos)
     }
 
+    // 根据标签筛选todo列表
+    pub fn find_todo_list_by_tag(con: &Connection, tag_name: &str) -> Result<Vec<Todo>> {
+        let mut stmt = con.prepare(
+            "SELECT DISTINCT t.id, t.title, t.date, t.repeat, t.end_repeat_type, t.end_repeat_date, 
+                    t.remaining_count, t.content, t.category, t.is_done, t.is_deleted, t.created_at, t.updated_at 
+             FROM todos t
+             INNER JOIN todo_tags tt ON t.id = tt.todo_id
+             INNER JOIN tags tg ON tt.tag_id = tg.id
+             WHERE t.is_deleted = 0 AND tg.name = ?
+             ORDER BY t.created_at DESC",
+        )?;
+
+        let todo_iter = stmt.query_map(params![tag_name], |row| {
+            let todo = Self::row_to_todo(row)?;
+            Ok(todo)
+        })?;
+
+        let mut todos = Vec::new();
+        for todo_result in todo_iter {
+            let mut todo = todo_result?;
+            // 获取标签
+            todo.tags = Self::get_todo_tags(con, &todo.id)?;
+            todos.push(todo);
+        }
+
+        Ok(todos)
+    }
+
     pub fn find_by_id(conn: &Connection, id: &str) -> Result<Option<Todo>> {
         let mut stmt = conn.prepare(
             "SELECT id, title, date, repeat, end_repeat_type, end_repeat_date, 
@@ -235,9 +263,24 @@ impl TagSchema {
         }
     }
 
-    pub fn get_all_tags(conn: &Connection) -> Result<Vec<String>> {
-        let mut stmt = conn.prepare("SELECT name FROM tags ORDER BY name")?;
-        let tag_iter = stmt.query_map([], |row| Ok(row.get(0)?))?;
+    pub fn get_tag_list(conn: &Connection) -> Result<Vec<Tag>> {
+        let mut stmt = conn.prepare(
+            "SELECT t.id, t.name, t.created_at, COUNT(CASE WHEN td.is_deleted = 0 THEN tt.todo_id END) as use_count 
+             FROM tags t 
+             LEFT JOIN todo_tags tt ON t.id = tt.tag_id 
+             LEFT JOIN todos td ON tt.todo_id = td.id 
+             GROUP BY t.id, t.name, t.created_at 
+             ORDER BY t.name"
+        )?;
+        
+        let tag_iter = stmt.query_map([], |row| {
+            Ok(Tag {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                created_at: row.get(2)?,
+                use_count: row.get(3)?,
+            })
+        })?;
 
         let mut tags = Vec::new();
         for tag_result in tag_iter {

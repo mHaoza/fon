@@ -1,8 +1,15 @@
 <script setup lang="ts">
-const props = defineProps<{
-  options: { label: string, icon?: string, value?: number | string | null }[]
-}>()
-const value = defineModel('value')
+import type { SidebarGroupProps, SidebarOption } from '../types'
+
+const props = defineProps<SidebarGroupProps>()
+const emit = defineEmits<{ change: [SidebarOption] }>()
+
+const value = defineModel<number | string | null>('value')
+
+function handleItemClick(option: SidebarOption) {
+  value.value = option.value
+  emit('change', option)
+}
 </script>
 
 <template>
@@ -10,18 +17,20 @@ const value = defineModel('value')
     <div
       v-for="(option, index) in props.options"
       :key="index"
-      class="sidebar-item p-2 rounded-md flex cursor-pointer items-center"
+      class="sidebar-item px-4 py-2 rounded-md flex cursor-pointer items-center"
       :class="{
         'bg-gray-100': value === option.value,
         'hover:bg-gray-100/50': value !== option.value,
       }"
-      @click="value = option.value"
+      @click="handleItemClick(option)"
     >
       <span v-if="option.icon" :class="option.icon" class="text-gray mr-1" />
-      <div class="text-sm">
+      <div class="text-sm flex-1">
         {{ option.label }}
       </div>
-      <div class="extra" />
+      <div>
+        <slot name="extra" :option="option" />
+      </div>
     </div>
   </div>
 </template>
