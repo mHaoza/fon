@@ -3,7 +3,7 @@ name = "fon"
 version = "0.0.1-beta.1"
 description = "A Todo App"
 authors = [ "mHaoza" ]
-edition = "2021"
+edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -37,4 +37,4 @@ uuid = { version = "1.0", features = [
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-global-shortcut = "2"
-tauri-plugin-single-instance = "2"
+tauri-plugin-single-instance = "2.3"
