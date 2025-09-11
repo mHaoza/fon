@@ -1,46 +1,64 @@
+use std::sync::Arc;
+use anyhow::Result;
+use rbatis::RBatis;
+use rbdc_sqlite::driver::SqliteDriver;
+
 pub mod todo;
+pub mod commands;
 
-use rusqlite::{Connection, Result};
-use std::sync::{Arc, Mutex};
-use tauri::AppHandle;
+pub use commands::DatabaseState;
 
-#[derive(Clone)]
+/// 数据库管理器
 pub struct Database {
-    conn: Arc<Mutex<Connection>>,
+    pub rb: Arc<RBatis>,
 }
 
 impl Database {
-    pub fn new(_app_handle: &AppHandle) -> Result<Self> {
-        // 获取应用程序可执行文件所在目录
-        let exe_dir = std::env::current_exe()
-            .expect("Failed to get executable path")
-            .parent()
-            .expect("Failed to get executable directory")
-            .to_path_buf();
-
-        // 在应用程序目录下创建data目录
-        let data_dir = exe_dir.join("data");
-        std::fs::create_dir_all(&data_dir).expect("Failed to create data directory");
-
-        let db_path = data_dir.join("todo.db");
-        let conn = Connection::open(db_path)?;
-
+    /// 创建数据库实例并初始化表
+    pub async fn new() -> Result<Self> {
+        let rb = RBatis::new();
+        
+        // 获取数据库文件路径
+        let db_path = Self::get_database_path();
+        let db_url = format!("sqlite://{}", db_path);
+        
+        // 初始化数据库连接
+        rb.init(SqliteDriver {}, &db_url)?;
+        
+        let database = Self {
+            rb: Arc::new(rb),
+        };
+        
         // 初始化数据库表
-        Self::init_tables(&conn)?;
-
-        Ok(Database {
-            conn: Arc::new(Mutex::new(conn)),
-        })
+        database.init_tables().await?;
+        
+        Ok(database)
     }
-
-    fn init_tables(conn: &Connection) -> Result<()> {
-        // 初始化各个领域模块的表
-        todo::init_tables(conn)?;
-
+    
+    /// 获取数据库文件路径
+    fn get_database_path() -> String {
+        let exe_dir = std::env::current_exe()
+            .and_then(|path| Ok(path.parent().unwrap().to_path_buf()))
+            .unwrap_or_else(|_| std::env::current_dir().unwrap());
+            
+        let data_dir = exe_dir.join("data");
+        
+        // 确保数据目录存在
+        if !data_dir.exists() {
+            std::fs::create_dir_all(&data_dir).unwrap();
+        }
+        
+        data_dir.join("todo.db").to_string_lossy().to_string()
+    }
+    
+    /// 初始化数据库表
+    async fn init_tables(&self) -> Result<()> {
+        todo::init_tables(&self.rb).await?;
         Ok(())
     }
-
-    pub fn get_connection(&self) -> std::sync::MutexGuard<'_, Connection> {
-        self.conn.lock().unwrap()
+    
+    /// 获取Todo仓储实例
+    pub fn todo_repository(&self) -> todo::TodoRepository {
+        todo::TodoRepository::new(self.rb.clone())
     }
 }

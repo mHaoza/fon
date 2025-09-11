@@ -3,11 +3,11 @@ pub mod core;
 pub mod database;
 pub mod feat;
 pub mod utils;
-use std::sync::Arc;
 use tauri::Manager;
+use std::sync::Arc;
 
-use crate::database::Database;
 use crate::utils::resolve;
+use crate::database::{Database, DatabaseState};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -20,13 +20,17 @@ pub fn run() {
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
-            // 初始化数据库
-            let app_handle = app.handle();
-            let db = Database::new(&app_handle).expect("Failed to initialize database");
-            let db = Arc::new(db);
-            app.manage(db);
 
             tauri::async_runtime::block_on(async move {
+                // 初始化数据库
+                let database = Database::new().await
+                    .expect("Failed to initialize database");
+                
+                // 将数据库状态添加到应用管理中
+                app.manage(DatabaseState {
+                    db: Arc::new(database),
+                });
+                
                 resolve::resolve_setup(app).await;
             });
 
@@ -34,13 +38,17 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             // 注册web端调用rust端方法
-            cmds::greet,
-            cmds::add_todo,
-            cmds::get_todo_list,
-            cmds::get_todo_by_id,
-            cmds::update_todo,
-            cmds::delete_todo,
-            cmds::get_tag_list,
+            database::commands::init_database,
+            database::commands::add_todo,
+            database::commands::get_todo_list,
+            database::commands::get_todo_list_with_filter,
+            database::commands::get_todo_by_id,
+            database::commands::update_todo,
+            database::commands::delete_todo,
+            database::commands::permanently_delete_todo,
+            database::commands::get_tag_list,
+            database::commands::get_or_create_tag,
+            database::commands::delete_tag,
         ]);
 
     let app = builder

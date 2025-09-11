@@ -10,7 +10,7 @@ const tagList = computed(() => todoStore.tagList.map(item => ({
   icon: 'i-mdi-tag-outline',
   filterInfo: {
     activeKey: `tag:${item.name}`,
-    params: { tag: item.name },
+    params: { tags: [item.name] },
   },
 })))
 </script>

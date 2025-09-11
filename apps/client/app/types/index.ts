@@ -21,5 +21,22 @@ export interface Tag {
   id: string
   name: string
   created_at: number
-  use_count: number
+}
+
+export interface PaginationListResponse<T> {
+  total: number
+  page: number
+  page_size: number
+  total_pages: number
+  data: T[]
+}
+
+export interface TodoListQuery {
+  page?: number
+  page_size?: number
+  tags?: string[]
+  category?: string
+  is_done?: boolean
+  sort?: keyof Todo
+  order?: 'asc' | 'desc'
 }

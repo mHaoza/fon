@@ -7,14 +7,15 @@ export const useTodoStore = defineStore('todo', () => {
   // 筛选参数
   const filterInfo = ref<{ activeKey: string | null, params: Record<string, any> }>({
     activeKey: null,
-    params: {},
+    params: { },
   })
 
   // todoList
   const { data: todoList, refresh: refreshTodoList } = useAsyncData(
     'todoList',
-    () => {
-      return fetchGetTodoList(filterInfo.value.params)
+    async () => {
+      const result = await fetchGetTodoList(filterInfo.value.params)
+      return result.data
     },
     {
       default: () => [],
