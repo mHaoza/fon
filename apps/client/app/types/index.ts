@@ -40,3 +40,12 @@ export interface TodoListQuery {
   sort?: keyof Todo
   order?: 'asc' | 'desc'
 }
+
+export interface TodoListFilterInfo {
+  /** params */
+  params: TodoListQuery
+  /** 获取数据 */
+  action: (params: TodoListQuery) => Promise<PaginationListResponse<Todo>>
+  /** 分组列表 */
+  filterList?: { title?: string, filter?: (todoList: Todo[]) => Todo[] }[]
+}

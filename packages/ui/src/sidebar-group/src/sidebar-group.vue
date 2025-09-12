@@ -2,7 +2,7 @@
 import type { SidebarGroupProps, SidebarOption } from '../types'
 
 const props = defineProps<SidebarGroupProps>()
-const emit = defineEmits<{ change: [SidebarOption] }>()
+const emit = defineEmits<{ change: [any] }>()
 
 const value = defineModel<number | string | null>('value')
 

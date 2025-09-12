@@ -1,27 +1,12 @@
-import type { CreateTodo, Todo } from '~/types'
+import type { CreateTodo, Todo, TodoListFilterInfo } from '~/types'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { fetchAddTodo, fetchGetTagList, fetchGetTodoById, fetchGetTodoList, fetchUpdateTodo } from '~/services/todo'
+import { fetchAddTodo, fetchGetTagList, fetchGetTodoById, fetchUpdateTodo } from '~/services/todo'
 
 export const useTodoStore = defineStore('todo', () => {
-  // 筛选参数
-  const filterInfo = ref<{ activeKey: string | null, params: Record<string, any> }>({
-    activeKey: null,
-    params: { },
-  })
-
-  // todoList
-  const { data: todoList, refresh: refreshTodoList } = useAsyncData(
-    'todoList',
-    async () => {
-      const result = await fetchGetTodoList(filterInfo.value.params)
-      return result.data
-    },
-    {
-      default: () => [],
-      watch: [() => filterInfo.value.params],
-    },
-  )
+  // 当前筛选筛选参数
+  const activeFilterKey = ref<string>('')
+  const filterInfoList = ref <TodoListFilterInfo[]>([])
 
   // tagList
   const { data: tagList, refresh: refreshTagList } = useAsyncData(
@@ -34,12 +19,9 @@ export const useTodoStore = defineStore('todo', () => {
   const activeTodo = ref<Todo | null>(null)
 
   // 监听筛选条件变化，刷新todo列表
-  watch(
-    () => filterInfo.value.activeKey,
-    () => {
-      activeTodoId.value = null
-    },
-  )
+  watch(activeFilterKey, () => {
+    activeTodoId.value = null
+  })
 
   watch(activeTodoId, async (id) => {
     if (id) {
@@ -52,26 +34,23 @@ export const useTodoStore = defineStore('todo', () => {
 
   async function addTodo(todo: CreateTodo) {
     await fetchAddTodo(todo)
-    refreshTodoList()
     refreshTagList()
   }
 
   async function updateTodo(todo: Parameters<typeof fetchUpdateTodo>[0]) {
     await fetchUpdateTodo(todo)
-    refreshTodoList()
     refreshTagList()
   }
 
   return {
-    todoList,
     tagList,
     activeTodoId,
     activeTodo,
-    filterInfo,
+    activeFilterKey,
+    filterInfoList,
 
     addTodo,
     updateTodo,
-    refreshTodoList,
     refreshTagList,
   }
 })

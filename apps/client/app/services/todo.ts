@@ -2,18 +2,18 @@ import type { CreateTodo, PaginationListResponse, Tag, Todo, TodoListQuery } fro
 import { invoke } from '@tauri-apps/api/core'
 
 export async function fetchGetTodoList(data: TodoListQuery) {
-  const todoList = await invoke<PaginationListResponse<Todo>>('get_todo_list_with_filter', { query: data })
-  return todoList
+  const result = await invoke<PaginationListResponse<Todo>>('get_todo_list_with_filter', { query: data })
+  return result
 }
 
 export async function fetchGetTagList() {
-  const tagList = await invoke<Tag[]>('get_tag_list')
-  return tagList
+  const result = await invoke<Tag[]>('get_tag_list')
+  return result
 }
 
 export async function fetchAddTodo(todo: CreateTodo) {
-  const newTodo = await invoke<Todo>('add_todo', { createTodo: todo })
-  return newTodo
+  const result = await invoke<Todo>('add_todo', { createTodo: todo })
+  return result
 }
 
 // export async function fetchAddTag(tag: string) {
@@ -21,13 +21,13 @@ export async function fetchAddTodo(todo: CreateTodo) {
 // }
 
 export async function fetchGetTodoById(id: string) {
-  const todo = await invoke<Todo | null>('get_todo_by_id', { id })
-  return todo
+  const result = await invoke<Todo | null>('get_todo_by_id', { id })
+  return result
 }
 
 export async function fetchUpdateTodo(todo: Partial<Todo> & { id: Todo['id'] }) {
-  const updatedTodo = await invoke<Todo>('update_todo', { updateTodo: todo })
-  return updatedTodo
+  const result = await invoke<Todo>('update_todo', { updateTodo: todo })
+  return result
 }
 
 export async function fetchDeleteTodo(id: string) {

@@ -1,130 +1,46 @@
 <script setup lang="ts">
-import type { ContextMenuItem } from '@fon/ui'
-import type { Todo } from '@/types'
-import { ContextMenu, TodoInput } from '@fon/ui'
-import { nextTick, ref, useTemplateRef } from 'vue'
+import type { Todo, TodoListFilterInfo } from '~/types'
+import { Collapsible, ScrollArea } from '@fon/ui'
 import { useTodoStore } from '~/store/todo'
-
-const todoInputRefs = useTemplateRef('todoInputRef')
+import TodoListItem from './todo-list-item.vue'
 
 const todoStore = useTodoStore()
-const focusedTodo = ref<string | null>(null)
 
-function setActiveTodo(todo: Todo, cursorPos?: number) {
-  todoStore.activeTodoId = todo.id
-  focusedTodo.value = todo.id
-  cursorPos = cursorPos ?? todo.title.length
-  nextTick(() => {
-    todoInputRefs.value?.[0]?.focus(cursorPos)
-  })
+const todoListGroup = ref<(TodoListFilterInfo & { todoList: Todo[], total: number })[]>([])
+
+async function initTodoListGroup() {
+  const groupList = []
+
+  for (const filterInfo of todoStore.filterInfoList) {
+    const result = await filterInfo.action(filterInfo.params)
+    groupList.push({
+      ...filterInfo,
+      todoList: result.data,
+      total: result.total,
+    })
+  }
+
+  todoListGroup.value = groupList
 }
 
-function handleTodoClick(e: MouseEvent, todo: Todo) {
-  const pos = document.caretPositionFromPoint(e.clientX, e.clientY)
-  if (pos && pos.offset !== null) {
-    setActiveTodo(todo, pos.offset)
-  }
-}
-
-async function updateTodoStatus(todo: Todo) {
-  try {
-    await todoStore.updateTodo({ id: todo.id, is_done: todo.is_done })
-  }
-  catch (error) {
-    console.error('Failed to update todo status:', error)
-    // 恢复原状态
-    todo.is_done = !todo.is_done
-  }
-}
-
-async function updateTodoTitle(todo: Todo) {
-  try {
-    await todoStore.updateTodo({ id: todo.id, title: todo.title })
-    focusedTodo.value = null
-  }
-  catch (error) {
-    console.error('Failed to update todo title:', error)
-  }
-}
-
-async function deleteTodo(todo: Todo) {
-  try {
-    await todoStore.updateTodo({ id: todo.id, is_deleted: true })
-    todoStore.activeTodoId = null
-  }
-  catch (error) {
-    console.error('Failed to delete todo:', error)
-  }
-}
-
-function getContextMenuItems(todo: Todo): ContextMenuItem[] {
-  return [
-    {
-      value: 'delete',
-      label: '删除',
-      icon: 'i-mdi-delete',
-      class: 'text-red-500',
-      onClick: () => deleteTodo(todo),
-    },
-  ]
-}
+watch(
+  () => todoStore.activeFilterKey,
+  () => {
+    initTodoListGroup()
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
-  <div class="todo-list">
-    <ContextMenu
-      v-for="(todo) in todoStore.todoList"
-      :key="todo.id"
-      :items="getContextMenuItems(todo)"
-    >
-      <div
-        class="todo-input px-3 rounded-md flex h-9 shadow-xs items-center relative"
-        :class="todoStore.activeTodoId === todo.id ? 'bg-gray-100' : 'hover:bg-gray-100/50'"
-        @click="handleTodoClick($event, todo)"
-        @contextmenu="handleTodoClick($event, todo)"
-      >
-        <input
-          v-model="todo.is_done"
-          type="checkbox"
-          class="mr-2 appearance-none border border-gray-400/60 rounded-[3px] grid h-4 w-4 cursor-pointer select-none place-content-center checked:border-blue-500 checked:bg-blue-500"
-          @click.stop
-          @change="updateTodoStatus(todo)"
-        >
-        <TodoInput
-          v-if="focusedTodo === todo.id"
-          ref="todoInputRef"
-          v-model:value="todo.title"
-          class="flex-1"
-          :parse-hash-tag="false"
-          @blur="updateTodoTitle(todo)"
-        >
-          <template #placeholder>
-            <div class="text-gray-400/90 flex items-center">
-              无标题
-            </div>
-          </template>
-        </TodoInput>
-        <template v-else>
-          <div class="flex flex-1 text-nowrap overflow-hidden">
-            <span v-if="todo.title">{{ todo.title }}</span>
-            <span v-else class="text-gray-400/90">无标题</span>
-          </div>
-        </template>
-
-        <TagView :tag-list="todo.tags" :max-tag-count="2" />
-
-        <!-- <div class="flex items-center">
-          <DatePicker v-model:data="todoStore.todoList[index]" :show-icon="false" @click.stop>
-            <template #triggerButton="{ showDate, isExpired }">
-              <span v-if="showDate" class="text-blue-400 ml-1 text-nowrap" :class="{ 'text-red-400': isExpired }">
-                {{ dayjs(showDate).format('YYYY-MM-DD') }}
-              </span>
-            </template>
-          </DatePicker>
-        </div> -->
-      </div>
-    </ContextMenu>
-  </div>
+  <ScrollArea>
+    <template v-for="({ todoList, filterList, params, total }) in todoListGroup">
+      <Collapsible v-for="(filterItem, filterIndex) in (filterList ?? [{}])" :key="filterIndex" :title="filterItem.title" default-open>
+        <TodoListItem v-for="(todo) in filterItem.filter?.(todoList) ?? todoList" :key="todo.id" :todo="todo" />
+        <div v-if="params.page && todoList.length < total">
+          更多
+        </div>
+      </Collapsible>
+    </template>
+  </ScrollArea>
 </template>
-
-<style scoped></style>
