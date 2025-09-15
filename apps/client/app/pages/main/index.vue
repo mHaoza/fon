@@ -11,10 +11,10 @@ useHead({ title: 'Fon-main' })
   <div class="p-4 flex h-full overflow-hidden">
     <TodoFilter class="pr-2 border-r border-gray-200/70 w-46" />
 
-    <div class="px-2 border-r border-gray-200/70 flex flex-col flex-1 h-full">
-      <AddInput class="mb-2" />
+    <div class="border-r border-gray-200/70 flex flex-col flex-1 h-full">
+      <AddInput class="mx-2 mb-2" />
 
-      <TodoList />
+      <TodoList class="px-2" />
     </div>
 
     <div class="pl-2 w-1/2">

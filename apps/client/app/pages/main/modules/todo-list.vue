@@ -19,7 +19,8 @@ async function initTodoListGroup() {
         todoList: result.data,
         total: result.total,
       })
-    } catch (error) {
+    }
+    catch (error) {
       console.error('获取待办事项列表失败:', error)
       // 失败时添加空数据
       groupList.push({
@@ -40,17 +41,23 @@ watch(
   },
   { immediate: true },
 )
+
+function filterTodoList(todoList: Todo [], filter?: ((todoList: Todo[]) => Todo[])) {
+  return filter?.(todoList) ?? todoList
+}
 </script>
 
 <template>
   <ScrollArea>
     <template v-for="({ todoList, filterList, params, total }) in todoListGroup">
-      <Collapsible v-for="(filterItem, filterIndex) in (filterList ?? [{}])" :key="filterIndex" :title="filterItem.title" default-open>
-        <TodoListItem v-for="(todo) in filterItem.filter?.(todoList) ?? todoList" :key="todo.id" :todo="todo" />
-        <div v-if="params.page && todoList.length < total">
-          更多
-        </div>
-      </Collapsible>
+      <template v-for="(filterItem, filterIndex) in (filterList ?? [{}])" :key="filterIndex">
+        <Collapsible v-if="filterTodoList(todoList, filterItem.filter).length !== 0" :title="filterItem.title" :default-open="!filterItem.collapse">
+          <TodoListItem v-for="(todo) in filterTodoList(todoList, filterItem.filter)" :key="todo.id" :todo="todo" />
+          <div v-if="params.page && todoList.length < total">
+            更多
+          </div>
+        </Collapsible>
+      </template>
     </template>
   </ScrollArea>
 </template>

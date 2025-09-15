@@ -59,5 +59,10 @@ export interface TodoListFilterInfo {
   /** 获取数据 */
   action: (params: TodoListQuery) => Promise<PaginationListResponse<Todo>>
   /** 分组列表 */
-  filterList?: { title?: string, filter?: (todoList: Todo[]) => Todo[] }[]
+  filterList?: {
+    title?: string
+    filter?: (todoList: Todo[]) => Todo[]
+    /** 默认折叠 */
+    collapse?: boolean
+  }[]
 }

@@ -24,10 +24,10 @@ const api = computed(() => collapsible.connect(service, normalizeProps))
 
 <template>
   <div v-bind="api.getRootProps()">
-    <button v-bind="api.getTriggerProps()" class="w-full">
-      <slot name="trigger">
-        <div class="group text-gray-500 p-1 rounded-md i-flex-y-center h-7 w-full hover:bg-gray-100">
-          <span class="i-mdi-chevron-right opacity-0 inline-block group-hover:opacity-100" :class="{ 'rotate-90': api.open }" />
+    <button v-if="props.title || $slots.trigger" v-bind="api.getTriggerProps()" class="w-full">
+      <slot name="trigger" :open="api.open" :title="props.title">
+        <div class="text-gray-500 p-1 rounded-md i-flex-y-center h-7 w-full hover:bg-gray-100">
+          <span class="i-mdi-chevron-right opacity-100 inline-block" :class="{ 'rotate-90': api.open }" />
           <span class="text-xs">{{ props.title }}</span>
           <div class="trigger-extra i-flex-center">
             <slot name="trigger-extra" />
