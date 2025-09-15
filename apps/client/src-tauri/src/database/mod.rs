@@ -5,8 +5,10 @@ use rbdc_sqlite::driver::SqliteDriver;
 
 pub mod todo;
 pub mod commands;
+pub mod response;
 
 pub use commands::DatabaseState;
+pub use response::ApiResponse;
 
 /// 数据库管理器
 pub struct Database {

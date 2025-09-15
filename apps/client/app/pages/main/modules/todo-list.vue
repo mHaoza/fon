@@ -12,12 +12,22 @@ async function initTodoListGroup() {
   const groupList = []
 
   for (const filterInfo of todoStore.filterInfoList) {
-    const result = await filterInfo.action(filterInfo.params)
-    groupList.push({
-      ...filterInfo,
-      todoList: result.data,
-      total: result.total,
-    })
+    try {
+      const result = await filterInfo.action(filterInfo.params)
+      groupList.push({
+        ...filterInfo,
+        todoList: result.data,
+        total: result.total,
+      })
+    } catch (error) {
+      console.error('获取待办事项列表失败:', error)
+      // 失败时添加空数据
+      groupList.push({
+        ...filterInfo,
+        todoList: [],
+        total: 0,
+      })
+    }
   }
 
   todoListGroup.value = groupList

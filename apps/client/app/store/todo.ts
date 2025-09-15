@@ -25,7 +25,12 @@ export const useTodoStore = defineStore('todo', () => {
 
   watch(activeTodoId, async (id) => {
     if (id) {
-      activeTodo.value = await fetchGetTodoById(id) ?? null
+      try {
+        activeTodo.value = await fetchGetTodoById(id) ?? null
+      } catch (error) {
+        console.error('获取待办事项详情失败:', error)
+        activeTodo.value = null
+      }
     }
     else {
       activeTodo.value = null
@@ -33,13 +38,23 @@ export const useTodoStore = defineStore('todo', () => {
   })
 
   async function addTodo(todo: CreateTodo) {
-    await fetchAddTodo(todo)
-    refreshTagList()
+    try {
+      await fetchAddTodo(todo)
+      refreshTagList()
+    } catch (error) {
+      console.error('添加待办事项失败:', error)
+      throw error // 重新抛出错误，供组件处理
+    }
   }
 
   async function updateTodo(todo: Parameters<typeof fetchUpdateTodo>[0]) {
-    await fetchUpdateTodo(todo)
-    refreshTagList()
+    try {
+      await fetchUpdateTodo(todo)
+      refreshTagList()
+    } catch (error) {
+      console.error('更新待办事项失败:', error)
+      throw error // 重新抛出错误，供组件处理
+    }
   }
 
   return {
