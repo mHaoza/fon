@@ -45,13 +45,32 @@ watch(
 function filterTodoList(todoList: Todo [], filter?: ((todoList: Todo[]) => Todo[])) {
   return filter?.(todoList) ?? todoList
 }
+
+/** 加载更多 */
+function handleBottomReached() {
+  const filterInfo = todoListGroup.value.find((filterInfo) => {
+    return filterInfo.filterList?.some((filterItem) => {
+      return filterInfo.params.page !== undefined && filterItem.open
+    })
+  })
+  if (filterInfo && filterInfo.todoList.length < filterInfo.total) {
+    filterInfo.params.page! += 1
+    filterInfo.action(filterInfo.params).then((result) => {
+      filterInfo.todoList.push(...result.data)
+    })
+  }
+}
 </script>
 
 <template>
-  <ScrollArea>
+  <ScrollArea @bottom-reached="handleBottomReached">
     <template v-for="({ todoList, filterList, params, total }) in todoListGroup">
       <template v-for="(filterItem, filterIndex) in (filterList ?? [{}])" :key="filterIndex">
-        <Collapsible v-if="filterTodoList(todoList, filterItem.filter).length !== 0" :title="filterItem.title" :default-open="!filterItem.collapse">
+        <Collapsible
+          v-if="filterTodoList(todoList, filterItem.filter).length !== 0"
+          v-model:open="filterItem.open"
+          :title="filterItem.title"
+        >
           <TodoListItem v-for="(todo) in filterTodoList(todoList, filterItem.filter)" :key="todo.id" :todo="todo" />
           <div v-if="params.page && todoList.length < total">
             更多

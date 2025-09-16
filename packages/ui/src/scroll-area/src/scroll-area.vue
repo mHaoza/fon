@@ -2,12 +2,33 @@
 import * as scrollArea from '@zag-js/scroll-area'
 import { normalizeProps, useMachine } from '@zag-js/vue'
 import { computed, useId } from 'vue'
+import { useScrollBottomReached } from './use-scroll-bottom-reached'
+
+interface Props {
+  bottomThreshold?: number
+  debounceDelay?: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  bottomThreshold: 50,
+  debounceDelay: 200,
+})
+
+const emit = defineEmits<{
+  bottomReached: []
+}>()
 
 const service = useMachine(scrollArea.machine, {
   id: useId(),
 })
 
 const api = computed(() => scrollArea.connect(service, normalizeProps))
+
+const { viewportRef } = useScrollBottomReached({
+  bottomThreshold: props.bottomThreshold,
+  debounceDelay: props.debounceDelay,
+  onBottomReached: () => emit('bottomReached'),
+})
 </script>
 
 <template>
@@ -15,7 +36,7 @@ const api = computed(() => scrollArea.connect(service, normalizeProps))
     v-bind="api.getRootProps()"
     class="scroll-area-container h-full w-full relative overflow-hidden"
   >
-    <div v-bind="api.getViewportProps()" class="h-full w-full overflow-auto">
+    <div v-bind="api.getViewportProps()" ref="viewportRef" class="h-full w-full overflow-auto">
       <div v-bind="api.getContentProps()" class="min-h-full min-w-full">
         <slot />
       </div>

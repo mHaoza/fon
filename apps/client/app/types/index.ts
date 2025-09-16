@@ -63,6 +63,6 @@ export interface TodoListFilterInfo {
     title?: string
     filter?: (todoList: Todo[]) => Todo[]
     /** 默认折叠 */
-    collapse?: boolean
+    open?: boolean
   }[]
 }

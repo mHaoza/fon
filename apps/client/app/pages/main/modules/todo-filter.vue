@@ -21,11 +21,12 @@ const baseFilterList: FilterOption[] = [
       {
         params: { is_done: false },
         action: params => fetchGetTodoList(params),
+        filterList: [{ open: true }],
       },
       {
         params: { is_done: true, page: 1, page_size: 50 },
         action: params => fetchGetTodoList(params),
-        filterList: [{ title: '已完成', collapse: true }],
+        filterList: [{ title: '已完成', open: false }],
       },
     ],
   },
@@ -40,11 +41,12 @@ const tagFilterList = computed(() => {
       {
         params: { tags: [item.name], is_done: false },
         action: params => fetchGetTodoList(params),
+        filterList: [{ open: true }],
       },
       {
         params: { tags: [item.name], is_done: true, page: 1, page_size: 50 },
         action: params => fetchGetTodoList(params),
-        filterList: [{ title: '已完成', collapse: true }],
+        filterList: [{ title: '已完成', open: false }],
       },
     ],
   }))
