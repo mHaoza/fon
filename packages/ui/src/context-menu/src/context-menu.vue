@@ -33,6 +33,7 @@ const api = computed(() => menu.connect(service, normalizeProps))
         <div
           v-bind="api.getContentProps()"
           class="py-1 outline-none border border-gray-200 rounded-lg bg-white min-w-48 shadow-lg"
+          @contextmenu="(e) => e.preventDefault()"
         >
           <template v-for="(item, index) in props.items" :key="item.value || index">
             <!-- 分隔符 -->
