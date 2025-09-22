@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use chrono::Utc;
 
+use super::pagination::{PaginationFilter, FilterBuilder, PaginationQuery, PaginationResult};
+
 pub mod repository;
 pub use repository::TodoRepository;
 
@@ -103,47 +105,137 @@ pub struct UpdateTodo {
 /// Todo列表查询参数
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TodoListQuery {
-    /// 页码
-    pub page: Option<u32>,
-    /// 每页大小
-    pub page_size: Option<u32>,
+    /// 分页参数
+    #[serde(flatten)]
+    pub pagination: PaginationQuery,
     /// 标签筛选，可以多个标签
     pub tags: Option<Vec<String>>,
     /// 分类筛选
     pub category: Option<String>,
     /// 完成状态筛选
     pub is_done: Option<bool>,
-    /// 排序字段，可选值：created_at, updated_at, title, date
-    pub sort_by: Option<String>,
-    /// 排序方向，asc 或 desc，默认desc
-    pub sort_order: Option<String>,
 }
 
-/// 分页结果
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct TodoListResult {
-    /// 数据列表
-    pub data: Vec<Todo>,
-    /// 总记录数
-    pub total: u32,
-    /// 当前页码
-    pub page: u32,
-    /// 每页大小
-    pub page_size: u32,
-    /// 总页数
-    pub total_pages: u32,
+/// Todo分页结果
+pub type TodoListResult = PaginationResult<Todo>;
+
+/// Todo分页筛选器
+pub struct TodoPaginationFilter {
+    pub tags: Option<Vec<String>>,
+    pub category: Option<String>,
+    pub is_done: Option<bool>,
+}
+
+/// 已删除Todo分页筛选器
+pub struct DeletedTodoPaginationFilter {
+    pub tags: Option<Vec<String>>,
+    pub category: Option<String>,
+    pub is_done: Option<bool>,
+}
+
+impl PaginationFilter for TodoPaginationFilter {
+    fn table_name(&self) -> &str {
+        "todos"
+    }
+    
+    fn primary_key(&self) -> &str {
+        "id"
+    }
+    
+    fn build_filter(&self) -> FilterBuilder {
+        let mut builder = FilterBuilder::new()
+            .eq("is_deleted", 0); // 默认只查询未删除的记录
+        
+        if let Some(category) = &self.category {
+            builder = builder.eq("category", category.as_str());
+        }
+        
+        if let Some(is_done) = self.is_done {
+            builder = builder.eq("is_done", if is_done { 1 } else { 0 });
+        }
+        
+        // 标签筛选需要特殊处理，因为涉及多表关联
+        if let Some(tags) = &self.tags {
+            if !tags.is_empty() {
+                // 这里我们使用子查询来处理标签筛选
+                let placeholders = tags.iter().map(|_| "?").collect::<Vec<_>>().join(",");
+                let subquery = format!(
+                    "id IN (SELECT DISTINCT todo_id FROM todo_tags tt 
+                     INNER JOIN tags t ON tt.tag_id = t.id 
+                     WHERE t.name IN ({}))",
+                    placeholders
+                );
+                builder = builder.custom(subquery, tags.clone());
+            }
+        }
+        
+        builder
+    }
+    
+    fn valid_sort_fields(&self) -> Vec<&str> {
+        vec!["created_at", "updated_at", "title", "date"]
+    }
+    
+    fn default_sort_field(&self) -> &str {
+        "created_at"
+    }
+}
+
+impl PaginationFilter for DeletedTodoPaginationFilter {
+    fn table_name(&self) -> &str {
+        "todos"
+    }
+    
+    fn primary_key(&self) -> &str {
+        "id"
+    }
+    
+    fn build_filter(&self) -> FilterBuilder {
+        let mut builder = FilterBuilder::new()
+            .eq("is_deleted", 1); // 只查询已删除的记录
+        
+        if let Some(category) = &self.category {
+            builder = builder.eq("category", category.as_str());
+        }
+        
+        if let Some(is_done) = self.is_done {
+            builder = builder.eq("is_done", if is_done { 1 } else { 0 });
+        }
+        
+        // 标签筛选需要特殊处理，因为涉及多表关联
+        if let Some(tags) = &self.tags {
+            if !tags.is_empty() {
+                // 这里我们使用子查询来处理标签筛选
+                let placeholders = tags.iter().map(|_| "?").collect::<Vec<_>>().join(",");
+                let subquery = format!(
+                    "id IN (SELECT DISTINCT todo_id FROM todo_tags tt 
+                     INNER JOIN tags t ON tt.tag_id = t.id 
+                     WHERE t.name IN ({}))",
+                    placeholders
+                );
+                builder = builder.custom(subquery, tags.clone());
+            }
+        }
+        
+        builder
+    }
+    
+    fn valid_sort_fields(&self) -> Vec<&str> {
+        vec!["created_at", "updated_at", "title", "date"]
+    }
+    
+    fn default_sort_field(&self) -> &str {
+        "created_at"
+    }
 }
 
 impl Default for TodoListQuery {
     fn default() -> Self {
         Self {
-            page: None,  // 不提供默认分页
-            page_size: None,  // 不提供默认分页
+            pagination: PaginationQuery::default(),
             tags: None,
             category: None,
             is_done: None,
-            sort_by: Some("created_at".to_string()),
-            sort_order: Some("desc".to_string()),
         }
     }
 }

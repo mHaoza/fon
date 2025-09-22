@@ -26,34 +26,34 @@ pub async fn add_todo(
 ) -> Result<ApiResponse<Todo>, String> {
     let repo = state.db.todo_repository();
     match repo.add_todo(create_todo).await {
-        Ok(todo) => Ok(ApiResponse::success_with_message(todo, "待办事项添加成功".to_string())),
+        Ok(result) => Ok(ApiResponse::success(result)),
         Err(e) => Ok(ApiResponse::internal_error(format!("添加待办事项失败: {}", e)))
     }
 }
 
-/// 获取Todo列表命令
+/// 获取Todo列表命令（支持分页和筛选）
 #[tauri::command]
 pub async fn get_todo_list(
     state: State<'_, DatabaseState>,
-) -> Result<ApiResponse<Vec<Todo>>, String> {
+    query: TodoListQuery,
+) -> Result<ApiResponse<TodoListResult>, String> {
     let repo = state.db.todo_repository();
-    match repo.get_todo_list().await {
-        Ok(todos) => Ok(ApiResponse::success(todos)),
+    match repo.get_todo_list(query).await {
+        Ok(result) => Ok(ApiResponse::success(result)),
         Err(e) => Ok(ApiResponse::internal_error(format!("获取待办事项列表失败: {}", e)))
     }
 }
 
-/// 带分页和筛选的获取Todo列表命令
+/// 获取已删除Todo列表命令（支持分页和筛选）
 #[tauri::command]
-pub async fn get_todo_list_with_filter(
+pub async fn get_deleted_todo_list(
     state: State<'_, DatabaseState>,
-    query: Option<TodoListQuery>,
+    query: TodoListQuery,
 ) -> Result<ApiResponse<TodoListResult>, String> {
     let repo = state.db.todo_repository();
-    let query = query.unwrap_or_default();
-    match repo.get_todo_list_with_filter(query).await {
+    match repo.get_deleted_todo_list(query).await {
         Ok(result) => Ok(ApiResponse::success(result)),
-        Err(e) => Ok(ApiResponse::internal_error(format!("获取待办事项列表失败: {}", e)))
+        Err(e) => Ok(ApiResponse::internal_error(format!("获取已删除待办事项列表失败: {}", e)))
     }
 }
 
@@ -75,10 +75,10 @@ pub async fn get_todo_by_id(
 pub async fn update_todo(
     state: State<'_, DatabaseState>,
     update_todo: UpdateTodo,
-) -> Result<ApiResponse<()>, String> {
+) -> Result<ApiResponse<Todo>, String> {
     let repo = state.db.todo_repository();
     match repo.update_todo(update_todo).await {
-        Ok(_) => Ok(ApiResponse::success_with_message((), "待办事项更新成功".to_string())),
+        Ok(todo) => Ok(ApiResponse::success(todo)),
         Err(e) => Ok(ApiResponse::internal_error(format!("更新待办事项失败: {}", e)))
     }
 }
@@ -91,7 +91,7 @@ pub async fn delete_todo(
 ) -> Result<ApiResponse<()>, String> {
     let repo = state.db.todo_repository();
     match repo.delete_todo(&id).await {
-        Ok(_) => Ok(ApiResponse::success_with_message((), "待办事项删除成功".to_string())),
+        Ok(_) => Ok(ApiResponse::success(())),
         Err(e) => Ok(ApiResponse::internal_error(format!("删除待办事项失败: {}", e)))
     }
 }
@@ -104,7 +104,7 @@ pub async fn permanently_delete_todo(
 ) -> Result<ApiResponse<()>, String> {
     let repo = state.db.todo_repository();
     match repo.permanently_delete_todo(&id).await {
-        Ok(_) => Ok(ApiResponse::success_with_message((), "待办事项永久删除成功".to_string())),
+        Ok(_) => Ok(ApiResponse::success(())),
         Err(e) => Ok(ApiResponse::internal_error(format!("永久删除待办事项失败: {}", e)))
     }
 }
@@ -129,7 +129,7 @@ pub async fn get_or_create_tag(
 ) -> Result<ApiResponse<Tag>, String> {
     let repo = state.db.todo_repository();
     match repo.get_or_create_tag(&name).await {
-        Ok(tag) => Ok(ApiResponse::success_with_message(tag, "标签获取或创建成功".to_string())),
+        Ok(tag) => Ok(ApiResponse::success(tag)),
         Err(e) => Ok(ApiResponse::internal_error(format!("获取或创建标签失败: {}", e)))
     }
 }
@@ -142,7 +142,7 @@ pub async fn delete_tag(
 ) -> Result<ApiResponse<()>, String> {
     let repo = state.db.todo_repository();
     match repo.delete_tag(&id).await {
-        Ok(_) => Ok(ApiResponse::success_with_message((), "标签删除成功".to_string())),
+        Ok(_) => Ok(ApiResponse::success(())),
         Err(e) => Ok(ApiResponse::internal_error(format!("删除标签失败: {}", e)))
     }
 }

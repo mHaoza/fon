@@ -12,19 +12,14 @@ const todo = defineModel<Todo>('todo', { required: true })
 const todoStore = useTodoStore()
 const focusedTodo = ref<string | null>(null)
 
-function setActiveTodo(todo: Todo, cursorPos?: number) {
-  todoStore.activeTodoId = todo.id
-  focusedTodo.value = todo.id
-  cursorPos = cursorPos ?? todo.title.length
-  nextTick(() => {
-    todoInputRef.value?.focus(cursorPos)
-  })
-}
-
 function handleTodoClick(e: MouseEvent, todo: Todo) {
   const pos = document.caretPositionFromPoint(e.clientX, e.clientY)
   if (pos && pos.offset !== null) {
-    setActiveTodo(todo, pos.offset)
+    setActiveTodo(todo.id)
+    focusedTodo.value = todo.id
+    nextTick(() => {
+      todoInputRef.value?.focus(pos.offset ?? todo.title.length)
+    })
   }
 }
 
@@ -51,12 +46,24 @@ async function updateTodoTitle(todo: Todo) {
 
 async function deleteTodo(todo: Todo) {
   try {
-    await todoStore.updateTodo({ id: todo.id, is_deleted: true })
-    todoStore.activeTodoId = null
+    await todoStore.deleteTodo(todo.id)
+    setActiveTodo(null)
   }
   catch (error) {
     console.error('Failed to delete todo:', error)
   }
+}
+
+const router = useRouter()
+function setActiveTodo(todoId?: string | null) {
+  router.push({
+    path: router.currentRoute.value.path,
+    hash: router.currentRoute.value.hash,
+    query: {
+      ...router.currentRoute.value.query,
+      todo: todoId || '',
+    },
+  })
 }
 
 function getContextMenuItems(todo: Todo): ContextMenuItem[] {

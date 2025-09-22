@@ -53,16 +53,37 @@ export interface TodoListQuery {
   order?: 'asc' | 'desc'
 }
 
-export interface TodoListFilterInfo {
-  /** params */
-  params: TodoListQuery
-  /** 获取数据 */
-  action: (params: TodoListQuery) => Promise<PaginationListResponse<Todo>>
-  /** 分组列表 */
-  filterList?: {
-    title?: string
-    filter?: (todoList: Todo[]) => Todo[]
-    /** 默认折叠 */
-    open?: boolean
-  }[]
+// -------- 视图/分区模型（新的筛选架构） --------
+export interface TodoSectionConfig {
+  key: string
+  title?: string
+  defaultOpen?: boolean
+  paginated?: boolean
+  pageSize?: number
+  /** 在服务端查询参数基础上叠加的分区级查询 */
+  query?: Partial<TodoListQuery>
+  /** 客户端额外过滤（可选） */
+  extraFilter?: (todo: Todo) => boolean
+}
+
+export interface TodoViewConfig {
+  key: string
+  label: string
+  icon?: string
+  /** 视图的基础查询参数 */
+  baseQuery: TodoListQuery
+  sections: TodoSectionConfig[]
+}
+
+export interface TodoSectionState {
+  key: string
+  title?: string
+  open: boolean
+  items: Todo[]
+  total: number
+  page: number | null
+  loading: boolean
+  error: string | null
+  paginated: boolean
+  pageSize: number | null
 }

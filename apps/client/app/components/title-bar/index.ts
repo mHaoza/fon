@@ -1,3 +1,3 @@
-import TitleBar from './src/index.vue'
+import TitleBar from './src/title-bar.vue'
 
 export default TitleBar

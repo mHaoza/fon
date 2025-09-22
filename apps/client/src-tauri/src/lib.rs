@@ -41,7 +41,7 @@ pub fn run() {
             database::commands::init_database,
             database::commands::add_todo,
             database::commands::get_todo_list,
-            database::commands::get_todo_list_with_filter,
+            database::commands::get_deleted_todo_list,
             database::commands::get_todo_by_id,
             database::commands::update_todo,
             database::commands::delete_todo,

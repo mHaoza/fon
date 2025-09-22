@@ -2,13 +2,13 @@
 import type { SidebarGroupProps, SidebarOption } from '../types'
 
 const props = defineProps<SidebarGroupProps>()
-const emit = defineEmits<{ change: [any] }>()
+const emit = defineEmits<{ change: [SidebarOption['value'], any] }>()
 
 const value = defineModel<number | string | null>('value')
 
 function handleItemClick(option: SidebarOption) {
   value.value = option.value
-  emit('change', option)
+  emit('change', option.value, option)
 }
 </script>
 
@@ -22,6 +22,7 @@ function handleItemClick(option: SidebarOption) {
         'bg-gray-100': value === option.value,
         'hover:bg-gray-100/50': value !== option.value,
       }"
+      v-bind="option?.eleProps"
       @click="handleItemClick(option)"
     >
       <span v-if="option.icon" :class="option.icon" class="text-gray mr-1" />

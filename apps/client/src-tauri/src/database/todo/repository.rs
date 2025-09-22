@@ -4,7 +4,8 @@ use rbatis::RBatis;
 use rbs::value;
 use chrono::Utc;
 
-use super::{Todo, Tag, CreateTodo, UpdateTodo, TodoEntity, TagEntity, TodoListQuery, TodoListResult};
+use super::{Todo, Tag, CreateTodo, UpdateTodo, TodoEntity, TagEntity, TodoListQuery, TodoListResult, TodoPaginationFilter, DeletedTodoPaginationFilter};
+use crate::database::{execute_pagination_query, PaginationResult};
 
 /// Todo数据访问层
 pub struct TodoRepository {
@@ -51,202 +52,10 @@ impl TodoRepository {
         
         Ok(todo)
     }
-    
-    /// 获取Todo列表
-    pub async fn get_todo_list(&self) -> Result<Vec<Todo>> {
-        let sql = "SELECT * FROM todos WHERE is_deleted = 0 ORDER BY created_at DESC";
-        let entities: Vec<TodoEntity> = self.rb.query_decode(sql, vec![]).await?;
-        
-        let mut todos = Vec::new();
-        for entity in entities {
-            let tags = self.get_todo_tags(&entity.id).await?;
-            todos.push(Todo::from_entity_with_tags(entity, tags));
-        }
-        
-        Ok(todos)
-    }
-    
-    /// 带分页和筛选的获取Todo列表
-    pub async fn get_todo_list_with_filter(&self, query: TodoListQuery) -> Result<TodoListResult> {
-        // 判断是否需要分页
-        let use_pagination = query.page.is_some() || query.page_size.is_some();
-        
-        let sort_by = query.sort_by.unwrap_or_else(|| "created_at".to_string());
-        let sort_order = query.sort_order.unwrap_or_else(|| "desc".to_string());
-        
-        // 验证排序字段
-        let valid_sort_fields = ["created_at", "updated_at", "title", "date", "is_done"];
-        let sort_field = if valid_sort_fields.contains(&sort_by.as_str()) {
-            sort_by
-        } else {
-            "created_at".to_string()
-        };
-        
-        // 验证排序方向
-        let order = if sort_order.to_lowercase() == "asc" { "ASC" } else { "DESC" };
-        
-        // 构建基础查询条件
-        let mut where_clauses = vec!["t.is_deleted = 0"];
-        let mut params = Vec::new();
-        
-        // 添加完成状态筛选
-        if let Some(is_done) = query.is_done {
-            where_clauses.push("t.is_done = ?");
-            params.push(value!(if is_done { 1 } else { 0 }));
-        }
-        
-        // 添加分类筛选
-        if let Some(category) = &query.category {
-            where_clauses.push("t.category = ?");
-            params.push(value!(category));
-        }
-        
-        // 构建标签筛选查询
-        let (main_sql_base, count_sql) = if let Some(tags) = &query.tags {
-            if !tags.is_empty() {
-                // 使用标签筛选的查询
-                let tag_placeholders = tags.iter().map(|_| "?").collect::<Vec<_>>().join(",");
-                for tag in tags {
-                    params.push(value!(tag));
-                }
-                
-                let where_clause = where_clauses.join(" AND ");
-                
-                let main_sql_base = format!(
-                    r#"
-                    SELECT DISTINCT t.* FROM todos t
-                    INNER JOIN todo_tags tt ON t.id = tt.todo_id
-                    INNER JOIN tags tag ON tt.tag_id = tag.id
-                    WHERE {} AND tag.name IN ({})
-                    GROUP BY t.id
-                    HAVING COUNT(DISTINCT tag.name) = ?
-                    ORDER BY t.{} {}
-                    "#,
-                    where_clause, tag_placeholders, sort_field, order
-                );
-                
-                let count_sql = format!(
-                    r#"
-                    SELECT COUNT(DISTINCT t.id) as count FROM todos t
-                    INNER JOIN todo_tags tt ON t.id = tt.todo_id
-                    INNER JOIN tags tag ON tt.tag_id = tag.id
-                    WHERE {} AND tag.name IN ({})
-                    GROUP BY t.id
-                    HAVING COUNT(DISTINCT tag.name) = ?
-                    "#,
-                    where_clause, tag_placeholders
-                );
-                
-                (main_sql_base, count_sql)
-            } else {
-                // 没有标签筛选的普通查询
-                let where_clause = where_clauses.join(" AND ");
-                
-                let main_sql_base = format!(
-                    "SELECT t.* FROM todos t WHERE {} ORDER BY t.{} {}",
-                    where_clause, sort_field, order
-                );
-                
-                let count_sql = format!(
-                    "SELECT COUNT(*) as count FROM todos t WHERE {}",
-                    where_clause
-                );
-                
-                (main_sql_base, count_sql)
-            }
-        } else {
-            // 没有标签筛选的普通查询
-            let where_clause = where_clauses.join(" AND ");
-            
-            let main_sql_base = format!(
-                "SELECT t.* FROM todos t WHERE {} ORDER BY t.{} {}",
-                where_clause, sort_field, order
-            );
-            
-            let count_sql = format!(
-                "SELECT COUNT(*) as count FROM todos t WHERE {}",
-                where_clause
-            );
-            
-            (main_sql_base, count_sql)
-        };
-        
-        // 执行总数查询
-        let mut count_params = params.clone();
-        if let Some(tags) = &query.tags {
-            if !tags.is_empty() {
-                count_params.push(value!(tags.len() as i64));
-            }
-        }
-        
-        let count_result: Vec<serde_json::Value> = self.rb.query_decode(&count_sql, count_params).await?;
-        let total = if let Some(tags) = &query.tags {
-            if !tags.is_empty() {
-                // 对于标签筛选，需要计算符合条件的组数
-                count_result.len() as u32
-            } else {
-                count_result.first()
-                    .and_then(|row| row.get("count"))
-                    .and_then(|v| v.as_i64())
-                    .unwrap_or(0) as u32
-            }
-        } else {
-            count_result.first()
-                .and_then(|row| row.get("count"))
-                .and_then(|v| v.as_i64())
-                .unwrap_or(0) as u32
-        };
-        
-        // 构建最终的查询SQL
-        let (main_sql, page, page_size, total_pages) = if use_pagination {
-            // 使用分页
-            let page = query.page.unwrap_or(1).max(1);
-            let page_size = query.page_size.unwrap_or(20).min(100).max(1); // 限制最大100
-            
-            let main_sql = format!("{} LIMIT ? OFFSET ?", main_sql_base);
-            let total_pages = if total == 0 { 1 } else { (total + page_size - 1) / page_size };
-            
-            (main_sql, page, page_size, total_pages)
-        } else {
-            // 不分页，查询所有数据
-            (main_sql_base, 1, total, 1)
-        };
-        
-        // 执行主查询
-        if let Some(tags) = &query.tags {
-            if !tags.is_empty() {
-                params.push(value!(tags.len() as i64));
-            }
-        }
-        
-        if use_pagination {
-            let page_size_for_query = if use_pagination { query.page_size.unwrap_or(20) } else { total };
-            let offset = if use_pagination { (query.page.unwrap_or(1) - 1) * page_size_for_query } else { 0 };
-            params.push(value!(page_size_for_query));
-            params.push(value!(offset));
-        }
-        
-        let entities: Vec<TodoEntity> = self.rb.query_decode(&main_sql, params).await?;
-        
-        // 获取每个Todo的标签
-        let mut todos = Vec::new();
-        for entity in entities {
-            let tags = self.get_todo_tags(&entity.id).await?;
-            todos.push(Todo::from_entity_with_tags(entity, tags));
-        }
-        
-        Ok(TodoListResult {
-            data: todos,
-            total,
-            page,
-            page_size,
-            total_pages,
-        })
-    }
-    
+
     /// 根据ID获取Todo
     pub async fn get_todo_by_id(&self, id: &str) -> Result<Option<Todo>> {
-        let sql = "SELECT * FROM todos WHERE id = ? AND is_deleted = 0";
+        let sql = "SELECT * FROM todos WHERE id = ?";
         let entities: Vec<TodoEntity> = self.rb.query_decode(sql, vec![value!(id)]).await?;
         
         if let Some(entity) = entities.into_iter().next() {
@@ -258,7 +67,7 @@ impl TodoRepository {
     }
     
     /// 更新Todo
-    pub async fn update_todo(&self, update_todo: UpdateTodo) -> Result<()> {
+    pub async fn update_todo(&self, update_todo: UpdateTodo) -> Result<Todo> {
         let todo_id = update_todo.id.clone();
         let mut set_clauses = Vec::new();
         let mut params = Vec::new();
@@ -320,7 +129,9 @@ impl TodoRepository {
             self.sync_todo_tags(&todo_id, &tags).await?;
         }
         
-        Ok(())
+        // 获取更新后的Todo
+        self.get_todo_by_id(&todo_id).await?
+            .ok_or_else(|| anyhow::anyhow!("更新后的待办事项未找到"))
     }
     
     /// 删除Todo（软删除）
@@ -392,6 +203,60 @@ impl TodoRepository {
         Ok(())
     }
     
+    /// 获取Todo列表（支持分页和筛选）
+    pub async fn get_todo_list(&self, query: TodoListQuery) -> Result<TodoListResult> {
+        // 创建分页筛选器
+        let filter = TodoPaginationFilter {
+            tags: query.tags,
+            category: query.category,
+            is_done: query.is_done,
+        };
+        
+        // 使用通用分页查询
+        let result: PaginationResult<TodoEntity> = execute_pagination_query(&self.rb, filter, query.pagination).await?;
+        
+        // 为每个Todo获取标签信息
+        let mut todos_with_tags = Vec::new();
+        for todo_entity in result.data {
+            let tags = self.get_todo_tags(&todo_entity.id).await?;
+            todos_with_tags.push(Todo::from_entity_with_tags(todo_entity, tags));
+        }
+        
+        Ok(TodoListResult::new(
+            todos_with_tags,
+            result.total,
+            result.page,
+            result.page_size,
+        ))
+    }
+
+    /// 获取已删除的Todo列表（支持分页和筛选）
+    pub async fn get_deleted_todo_list(&self, query: TodoListQuery) -> Result<TodoListResult> {
+        // 创建分页筛选器，专门用于已删除的待办事项
+        let filter = DeletedTodoPaginationFilter {
+            tags: query.tags,
+            category: query.category,
+            is_done: query.is_done,
+        };
+        
+        // 使用通用分页查询
+        let result: PaginationResult<TodoEntity> = execute_pagination_query(&self.rb, filter, query.pagination).await?;
+        
+        // 为每个Todo获取标签信息
+        let mut todos_with_tags = Vec::new();
+        for todo_entity in result.data {
+            let tags = self.get_todo_tags(&todo_entity.id).await?;
+            todos_with_tags.push(Todo::from_entity_with_tags(todo_entity, tags));
+        }
+        
+        Ok(TodoListResult::new(
+            todos_with_tags,
+            result.total,
+            result.page,
+            result.page_size,
+        ))
+    }
+
     /// 获取Todo的标签列表
     async fn get_todo_tags(&self, todo_id: &str) -> Result<Vec<String>> {
         let sql = r#"
