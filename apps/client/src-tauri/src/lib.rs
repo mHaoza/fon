@@ -46,6 +46,7 @@ pub fn run() {
             database::commands::update_todo,
             database::commands::delete_todo,
             database::commands::permanently_delete_todo,
+            database::commands::restore_todo,
             database::commands::get_tag_list,
             database::commands::get_or_create_tag,
             database::commands::delete_tag,

@@ -158,6 +158,19 @@ impl TodoRepository {
         Ok(())
     }
     
+    /// 恢复Todo（从已删除状态恢复）
+    pub async fn restore_todo(&self, id: &str) -> Result<Todo> {
+        let sql = "UPDATE todos SET is_deleted = 0, updated_at = ? WHERE id = ?";
+        self.rb.exec(sql, vec![
+            value!(Utc::now().timestamp()),
+            value!(id)
+        ]).await?;
+        
+        // 获取恢复后的Todo
+        self.get_todo_by_id(id).await?
+            .ok_or_else(|| anyhow::anyhow!("恢复后的待办事项未找到"))
+    }
+    
     /// 获取标签列表
     pub async fn get_tag_list(&self) -> Result<Vec<Tag>> {
         let sql = "SELECT * FROM tags ORDER BY name ASC";

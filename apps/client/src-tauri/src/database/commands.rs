@@ -109,6 +109,19 @@ pub async fn permanently_delete_todo(
     }
 }
 
+/// 恢复Todo命令
+#[tauri::command]
+pub async fn restore_todo(
+    state: State<'_, DatabaseState>,
+    id: String,
+) -> Result<ApiResponse<Todo>, String> {
+    let repo = state.db.todo_repository();
+    match repo.restore_todo(&id).await {
+        Ok(todo) => Ok(ApiResponse::success(todo)),
+        Err(e) => Ok(ApiResponse::internal_error(format!("恢复待办事项失败: {}", e)))
+    }
+}
+
 /// 获取标签列表命令
 #[tauri::command]
 pub async fn get_tag_list(

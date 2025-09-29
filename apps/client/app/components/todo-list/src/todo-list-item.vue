@@ -32,11 +32,6 @@ async function updateTodoTitle(todo: Todo) {
   focusedTodo.value = null
 }
 
-async function deleteTodo(todo: Todo) {
-  await todoStore.deleteTodo(todo.id)
-  setActiveTodo(null)
-}
-
 const router = useRouter()
 function setActiveTodo(todoId?: string | null) {
   router.push({
@@ -50,14 +45,39 @@ function setActiveTodo(todoId?: string | null) {
 }
 
 function getFloatMenuItems(todo: Todo): FloatMenuItem[] {
-  return [
-    {
-      title: '删除',
-      icon: 'i-mdi-delete',
-      class: 'text-red-500',
-      action: () => deleteTodo(todo),
-    },
-  ]
+  if (!todo.is_deleted) {
+    return [
+      {
+        title: '删除',
+        icon: 'i-mdi-delete',
+        class: 'text-red-500',
+        action: async () => {
+          await todoStore.deleteTodo(todo.id)
+          setActiveTodo(null)
+        },
+      },
+    ]
+  }
+  else {
+    return [
+      {
+        title: '恢复',
+        icon: 'i-mdi-delete-restore',
+        action: async () => {
+          await todoStore.restoreTodo(todo.id)
+          setActiveTodo(null)
+        },
+      },
+      {
+        title: '永久删除',
+        icon: 'i-mdi-delete',
+        action: async () => {
+          await todoStore.permanentlyDeleteTodo(todo.id)
+          setActiveTodo(null)
+        },
+      },
+    ]
+  }
 }
 
 function openContextMenu(e: MouseEvent, todo: Todo) {
