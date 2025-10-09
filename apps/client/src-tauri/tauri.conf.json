@@ -9,6 +9,10 @@
       "capabilities": [
         "default-capability"
       ],
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["*/**"]
+      },
       "csp": null
     }
   },

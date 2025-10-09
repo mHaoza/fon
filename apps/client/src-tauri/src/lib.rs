@@ -12,6 +12,7 @@ use crate::database::{Database, DatabaseState};
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = tauri::Builder::default()
+        .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             let _ = app.get_webview_window("main")
                        .expect("no main window")
@@ -29,7 +30,7 @@ pub fn run() {
                 // 将数据库状态添加到应用管理中
                 app.manage(DatabaseState {
                     db: Arc::new(database),
-                });
+                });                
                 
                 resolve::resolve_setup(app).await;
             });

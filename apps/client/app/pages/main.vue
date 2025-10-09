@@ -32,9 +32,19 @@ const otherMenuList = [
 ]
 
 const router = useRouter()
-go(baseMenuList[0]!.value)
+
 function go(value: string | number | null) {
-  router.push({ path: '/main/tasks', hash: value?.toString() })
+  if (value === '/files') {
+    router.push('/files')
+  }
+  else {
+    router.push({ path: '/main/tasks', hash: value?.toString() })
+  }
+}
+
+// 初始路由
+if (!router.currentRoute.value.hash) {
+  go(baseMenuList[0]!.value)
 }
 </script>
 
