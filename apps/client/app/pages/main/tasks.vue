@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { MdEditor } from '@fon/ui'
-import { convertFileSrc } from '@tauri-apps/api/core'
 import { resourceDir } from '@tauri-apps/api/path'
 import { debounce } from 'lodash-es'
 import { nanoid } from 'nanoid'
@@ -32,31 +31,18 @@ const customUpload = {
       return result
     }))
     // 插入图片
-    vditorRef.value?.vditor()?.insertValue(fileInfoList.map(fileInfo => `![${fileInfo.name}](${fileInfo.path})`).join('\n'))
+    vditorRef.value?.vditor?.insertValue(fileInfoList.map(fileInfo => `![${fileInfo.name}](${fileInfo.path})`).join('\n'))
 
     return null
   },
 }
 
-/** 处理markdown 中 img标签图片路径渲染问题 */
-async function processImgSrc() {
+async function linkBase() {
   const dir = await resourceDir()
   const normalized = dir.replace(/\\/g, '/')
   const parent = normalized.replace(/\/?resources\/?$/, '')
-
-  vditorRef.value?.$el?.querySelectorAll('img').forEach((img: HTMLImageElement) => {
-    const imgSrc = img.getAttribute('src')
-    if (imgSrc && !imgSrc.startsWith('http')) {
-      img.src = convertFileSrc(`${parent}/${imgSrc}`)
-    }
-  })
+  return `http://asset.localhost/${parent}/`
 }
-
-/** 监听content变更， 处理img标签图片路径渲染问题 */
-watch(() => todoStore.activeTodo?.content, async () => {
-  await nextTick()
-  processImgSrc()
-})
 </script>
 
 <template>
@@ -70,10 +56,10 @@ watch(() => todoStore.activeTodo?.content, async () => {
         v-model:value="todoStore.activeTodo.content"
         placeholder="请输入内容"
         :upload="customUpload"
+        :link-base="linkBase"
         class="h-full"
-        @change="updateTodo"
+        @change="() => { updateTodo() }"
         @blur="updateTodo.flush()"
-        @loaded="processImgSrc"
       />
     </div>
   </div>

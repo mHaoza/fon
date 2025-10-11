@@ -11,6 +11,7 @@ interface MdEditorProps {
     max: number
     handler?: (files: File[]) => string | null | Promise<string> | Promise<null>
   }
+  linkBase?: () => Promise<string> | string
 }
 
 const props = defineProps<MdEditorProps>()
@@ -18,13 +19,14 @@ const props = defineProps<MdEditorProps>()
 const emit = defineEmits<{
   change: [value: string]
   blur: [value: string]
-  loaded: []
 }>()
 
 const modelValue = defineModel<string>('value', { default: '' })
 const vditorEl = useTemplateRef('vditorEl')
 const vditor = ref<Vditor | null>(null)
-function initVditor() {
+async function initVditor() {
+  const linkBase = await props.linkBase?.()
+
   vditor.value = new Vditor(vditorEl.value!, {
     placeholder: props.placeholder ?? '',
     height: props.height,
@@ -45,8 +47,8 @@ function initVditor() {
     after: () => {
       vditor.value?.setValue(modelValue.value)
       vditor.value?.focus()
-      emit('loaded')
     },
+    preview: { markdown: { linkBase } },
   })
 }
 
@@ -60,7 +62,7 @@ watch(modelValue, (value) => {
   }
 })
 
-defineExpose({ vditor: () => vditor.value })
+defineExpose({ vditor })
 </script>
 
 <template>
