@@ -1,4 +1,4 @@
-use tauri::{App, Manager};
+use tauri::{App, Emitter, Manager};
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, ShortcutState};
 
 use crate::core::{handle, tray};
@@ -46,6 +46,7 @@ pub fn create_main_window() {
         }
         let _ = window.show();
         let _ = window.set_focus();
+        let _ = window.emit("show", ());
         return;
     };
 

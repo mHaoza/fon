@@ -2,6 +2,7 @@
 import type { CreateTodo } from '@/types'
 // import DatePicker from '@/components/DatePicker'
 import { TodoInput } from '@fon/ui'
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { ref, useTemplateRef } from 'vue'
 import { useTodoStore } from '~/store/todo'
 
@@ -64,6 +65,19 @@ async function addTodo() {
     console.error('Failed to add todo:', error)
   }
 }
+
+// 窗口显示时自动获取焦点
+let unlisten: () => void
+onMounted(async () => {
+  todoInput.value?.focus()
+  const webviewWindow = getCurrentWebviewWindow()
+  unlisten = await webviewWindow.listen('show', () => {
+    todoInput.value?.focus()
+  })
+})
+onUnmounted(() => {
+  unlisten()
+})
 </script>
 
 <template>

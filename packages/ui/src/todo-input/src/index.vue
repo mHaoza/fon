@@ -76,11 +76,13 @@ function initInput(defaultValue: string) {
   })
 }
 
-function focus(pos: number) {
+function focus(pos?: number) {
   editorView.value?.focus()
-  editorView.value?.dispatch({
-    selection: { anchor: pos, head: pos },
-  })
+  if (pos) {
+    editorView.value?.dispatch({
+      selection: { anchor: pos, head: pos },
+    })
+  }
 }
 defineExpose({ isFocused, hasContent, editorView, focus })
 </script>
