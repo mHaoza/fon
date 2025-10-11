@@ -36,7 +36,7 @@ export const useTodoStore = defineStore('todo', () => {
     else {
       activeTodo.value = null
     }
-  })
+  }, { immediate: true })
 
   const query = computed(() => activeViewInfo.value?.query(route) ?? {})
   const todos = reactive({
