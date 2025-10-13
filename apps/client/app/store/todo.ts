@@ -41,7 +41,7 @@ export const useTodoStore = defineStore('todo', () => {
   const query = computed(() => activeViewInfo.value?.query(route) ?? {})
   const todos = reactive({
     undone: useTodoList(fetchGetTodoList, { is_done: false }, query),
-    done: useTodoList(fetchGetTodoList, { is_done: true }, query),
+    done: useTodoList(fetchGetTodoList, { is_done: true, page: 1, page_size: 50 }, query),
     deleted: useTodoList(fetchGetDeletedTodoList, {}, query),
   })
 
