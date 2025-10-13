@@ -1,3 +1,4 @@
+export * from './src/checkbox'
 export * from './src/collapsible'
 export * from './src/context-menu'
 export * from './src/date-picker'

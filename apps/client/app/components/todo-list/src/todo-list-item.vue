@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { FloatMenuItem } from '@fon/ui'
 import type { Todo } from '@/types'
-import { showFloatMenu, TodoInput } from '@fon/ui'
+import { Checkbox, showFloatMenu, TodoInput } from '@fon/ui'
 import { nextTick, ref, useTemplateRef } from 'vue'
 import { useTodoStore } from '~/store/todo'
 
@@ -96,13 +96,20 @@ function openContextMenu(e: MouseEvent, todo: Todo) {
     @click="handleTodoClick($event, todo)"
     @contextmenu="(e) => { setActiveTodo(todo.id); openContextMenu(e, todo) }"
   >
-    <input
+    <Checkbox
+      v-model="todo.is_done"
+      color="gray"
+      class="mr-1"
+      @click.stop
+      @change="updateTodoStatus(todo)"
+    />
+    <!-- <input
       v-model="todo.is_done"
       type="checkbox"
       class="mr-2 appearance-none border border-gray-400/60 rounded-[3px] grid h-4 w-4 cursor-pointer select-none place-content-center checked:border-blue-500 checked:bg-blue-500"
       @click.stop
       @change="updateTodoStatus(todo)"
-    >
+    > -->
     <TodoInput
       v-if="focusedTodo === todo.id"
       ref="todoInputRef"
