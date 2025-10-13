@@ -46,7 +46,7 @@ async function linkBase() {
 </script>
 
 <template>
-  <div class="p-4 flex h-full overflow-hidden">
+  <div class="flex h-full overflow-hidden">
     <TodoList class="flex-1" />
 
     <div class="pl-2 h-full w-1/2">

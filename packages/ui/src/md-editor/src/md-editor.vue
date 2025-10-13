@@ -78,7 +78,6 @@ defineExpose({ vditor })
 }
 .md-editor :deep(.vditor-ir pre.vditor-reset) {
   background-color: transparent;
-  padding: 0!important;
   font-size: 14px;
 }
 </style>
