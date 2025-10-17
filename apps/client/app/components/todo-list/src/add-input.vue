@@ -6,9 +6,18 @@ import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { ref, useTemplateRef } from 'vue'
 import { useTodoStore } from '~/store/todo'
 
+const route = useRoute()
 const todoStore = useTodoStore()
 const todoInput = useTemplateRef('todoInput')
 const todo = ref<CreateTodo>(getDefaultTodoData())
+
+const placeholder = computed(() => {
+  if (todoStore.activeViewInfo?.reg.test('#tag')) {
+    const tag = typeof todoStore.activeViewInfo.title === 'string' ? todoStore.activeViewInfo.title : todoStore.activeViewInfo.title(route)
+    return `添加任务至'${tag}'`
+  }
+  return '添加任务'
+})
 
 function getDefaultTodoData(): CreateTodo {
   return {
@@ -23,6 +32,25 @@ function getDefaultTodoData(): CreateTodo {
     category: null,
     is_done: false,
     is_deleted: false,
+  }
+}
+
+function handleFocus() {
+  if (!todo.value.title && todoStore.activeViewInfo?.reg.test('#tag')) {
+    const tag = typeof todoStore.activeViewInfo.title === 'string' ? todoStore.activeViewInfo.title : todoStore.activeViewInfo.title(route)
+    todo.value.title = `${tag} `
+    // 设置光标位置
+    nextTick(() => {
+      const pos = tag.length
+      todoInput.value?.editorView?.dispatch({ selection: { anchor: pos, head: pos } })
+    })
+  }
+}
+
+function handleBlur() {
+  const tag = typeof todoStore.activeViewInfo?.title === 'string' ? todoStore.activeViewInfo.title : todoStore.activeViewInfo?.title(route)
+  if (todo.value.title === `${tag} `) {
+    todo.value.title = ''
   }
 }
 
@@ -83,13 +111,17 @@ onUnmounted(() => {
 <template>
   <div
     class="todo-input px-3 py-1 border rounded-md flex items-center"
-    :class="todoInput?.isFocused ? 'border-blue-600' : 'bg-gray-300/10 border-transparent'"
+    :class="{
+      'border-blue-600': todoInput?.isFocused,
+      'border-gray-300': !todoInput?.isFocused,
+      'bg-gray-300/10 border-transparent': !todo.title && !todoInput?.isFocused,
+    }"
   >
-    <TodoInput ref="todoInput" v-model:value="todo.title" class="flex-1" @keyup.enter="addTodo">
+    <TodoInput ref="todoInput" v-model:value="todo.title" class="flex-1" @keyup.enter="addTodo" @focus="handleFocus" @blur="handleBlur">
       <template #placeholder>
         <div class="text-gray-400/90 flex items-center">
           <i class="i-lucide:plus text-icon-small mr-1" />
-          Add task
+          {{ placeholder }}
         </div>
       </template>
     </TodoInput>

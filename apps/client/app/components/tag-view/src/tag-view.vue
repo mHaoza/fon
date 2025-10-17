@@ -6,6 +6,8 @@ const props = withDefaults(defineProps<TagViewProps>(), {
   maxTagCount: 5,
   maxTagTextLength: 10,
 })
+  
+const router = useRouter()
 
 // 截断文字
 function truncateText(text: string): string {
@@ -24,16 +26,24 @@ const visibleTags = computed(() => {
 const remainingTags = computed(() => {
   return props.tagList.slice(props.maxTagCount)
 })
+
+function switchTagList(tag: string) {
+  router.push({
+    path: '/main/tasks',
+    hash: `#tag/${tag}`,
+  })
+}
 </script>
 
 <template>
-  <div class="flex flex-wrap gap-1.5 items-center">
+  <div class="flex flex-wrap gap-1.5 items-center" @click.stop>
     <div
       v-for="(tag, index) in visibleTags"
       :key="index"
-      class="text-xs text-gray-800 leading-5 line-height-none px-2 py-0.5 border border-black/10 rounded-full inline-flex max-w-30 cursor-default whitespace-nowrap items-center overflow-hidden"
+      class="text-xs text-gray-800 leading-5 line-height-none px-2 py-0.5 border border-black/10 rounded-full inline-flex max-w-30 cursor-default cursor-pointer whitespace-nowrap items-center overflow-hidden"
       :style="{ backgroundColor: getTagColor(tag) }"
       :title="tag.length > maxTagTextLength ? tag : ''"
+      @click="switchTagList(tag)"
     >
       {{ truncateText(tag) }}
     </div>

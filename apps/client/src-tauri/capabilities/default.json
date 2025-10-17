@@ -30,6 +30,9 @@
     "fs:allow-applocaldata-write-recursive",
 
     "core:path:allow-resolve-directory",
-    "core:path:default"
+    "core:path:default",
+
+    "core:event:default",
+    "core:event:allow-unlisten"
   ]
 }

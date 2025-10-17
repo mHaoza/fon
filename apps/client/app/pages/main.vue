@@ -4,6 +4,7 @@ import { useTodoStore } from '~/store/todo'
 
 useHead({ title: 'Fon-main' })
 
+const router = useRouter()
 const todoStore = useTodoStore()
 
 const baseMenuList = [
@@ -31,8 +32,6 @@ const otherMenuList = [
   },
 ]
 
-const router = useRouter()
-
 function go(value: string | number | null) {
   if (value === '/files') {
     router.push('/files')
@@ -49,8 +48,8 @@ if (!router.currentRoute.value.hash) {
 </script>
 
 <template>
-  <div class="p-4 flex h-full overflow-hidden">
-    <div class="pr-2 border-r border-gray-200/70 w-46">
+  <div class="flex h-full overflow-hidden">
+    <div class="p-2 border-r border-gray-200/70 w-46">
       <!-- 基础分组 -->
       <SidebarGroup :value="$route.hash" :options="baseMenuList" @change="go" />
       <div class="mx-1 my-2 bg-gray-100 h-[1px]" />
