@@ -162,6 +162,43 @@ async function updateCargoVersion(newVersion) {
 }
 
 /**
+ * 更新 Cargo.lock 版本号
+ * @param {string} newVersion
+ */
+async function updateCargoLockVersion(newVersion) {
+  const cargoLockPath = path.join(process.cwd(), 'Cargo.lock')
+  try {
+    if (!(await fs.access(cargoLockPath).then(() => true).catch(() => false))) {
+      console.warn('[WARN]: Cargo.lock not found, skipping')
+      return
+    }
+
+    const data = await fs.readFile(cargoLockPath, 'utf8')
+    const lines = data.split('\n')
+    const versionWithoutV = newVersion.startsWith('v') ? newVersion.slice(1) : newVersion
+
+    const updatedLines = lines.map((line) => {
+      // 查找 fon 包的版本行
+      if (line.trim().startsWith('name = "fon"')) {
+        // 找到下一行的版本行并更新
+        const currentIndex = lines.indexOf(line)
+        if (currentIndex + 1 < lines.length && lines[currentIndex + 1].trim().startsWith('version =')) {
+          lines[currentIndex + 1] = lines[currentIndex + 1].replace(/version = "[^"]+"/, `version = "${versionWithoutV}"`)
+        }
+      }
+      return line
+    })
+
+    await fs.writeFile(cargoLockPath, updatedLines.join('\n'), 'utf8')
+    console.log(`[INFO]: Cargo.lock version updated to: ${versionWithoutV}`)
+  }
+  catch (error) {
+    console.error('Error updating Cargo.lock version:', error)
+    throw error
+  }
+}
+
+/**
  * 更新 tauri.conf.json 版本号
  * @param {string} newVersion
  */
@@ -257,6 +294,7 @@ async function main(versionArg) {
     await updatePackageVersion('packages/ui/package.json', newVersion)
     await updatePackageVersion('packages/uno-preset/package.json', newVersion)
     await updateCargoVersion(newVersion)
+    await updateCargoLockVersion(newVersion)
     await updateTauriConfigVersion(newVersion)
 
     console.log('[SUCCESS]: All version updates completed successfully!')
