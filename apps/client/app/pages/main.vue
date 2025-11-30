@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { Collapsible, SidebarGroup } from '@fon/ui'
+import type { FloatMenuItem } from '@fon/ui'
+import { Collapsible, showFloatMenu, SidebarGroup } from '@fon/ui'
 import { useTodoStore } from '~/store/todo'
 
 useHead({ title: 'Fon-main' })
 
 const router = useRouter()
+const route = useRoute()
 const todoStore = useTodoStore()
 
 const baseMenuList = [
@@ -15,13 +17,6 @@ const baseMenuList = [
     eleProps: { id: 'all' },
   },
 ]
-
-const tagMenuList = computed(() => todoStore.tagList.map(item => ({
-  label: item.name,
-  value: `#tag/${item.name}`,
-  icon: 'i-mdi-tag-outline',
-  eleProps: { id: `tag/${item.name}` },
-})))
 
 const otherMenuList = [
   {
@@ -41,6 +36,43 @@ function go(value: string | number | null) {
   }
 }
 
+// 删除标签
+async function handleDeleteTag(tagId: string, tagName: string) {
+  try {
+    await todoStore.deleteTag(tagId)
+    // 如果当前正在查看被删除的标签，跳转到"所有"视图
+    if (route.hash === `#tag/${tagName}`) {
+      go(baseMenuList[0]!.value)
+    }
+  }
+  catch (error) {
+    console.error('删除标签失败:', error)
+  }
+}
+
+// 获取标签菜单项
+function getTagMenuItems(tagId: string, tagName: string): FloatMenuItem[] {
+  return [
+    {
+      title: '删除标签',
+      icon: 'i-mdi-delete',
+      class: 'text-red-500',
+      action: async () => {
+        await handleDeleteTag(tagId, tagName)
+      },
+    },
+  ]
+}
+
+// 打开标签右键菜单
+function openTagContextMenu(e: MouseEvent, tagId: string, tagName: string) {
+  e.preventDefault()
+  showFloatMenu({
+    items: getTagMenuItems(tagId, tagName),
+    position: { x: e.clientX, y: e.clientY },
+  })
+}
+
 // 初始路由
 if (!router.currentRoute.value.hash) {
   go(baseMenuList[0]!.value)
@@ -55,11 +87,27 @@ if (!router.currentRoute.value.hash) {
       <div class="mx-1 my-2 bg-gray-100 h-[1px]" />
       <!-- 标签分组（可折叠） -->
       <Collapsible default-open>
-        <SidebarGroup :value="$route.hash" :options="tagMenuList" @change="go">
-          <template #extra="{ option }">
-            <div class="rounded-full h-3 w-3" :style="{ backgroundColor: getTagColor(option.label) }" />
-          </template>
-        </SidebarGroup>
+        <div class="sidebar-group">
+          <div
+            v-for="tag in todoStore.tagList"
+            :key="tag.id"
+            class="sidebar-item px-4 py-2 rounded-md flex cursor-pointer items-center"
+            :class="{
+              'bg-gray-100': $route.hash === `#tag/${tag.name}`,
+              'hover:bg-gray-100/50': $route.hash !== `#tag/${tag.name}`,
+            }"
+            @click="go(`#tag/${tag.name}`)"
+            @contextmenu="(e) => openTagContextMenu(e, tag.id, tag.name)"
+          >
+            <span class="i-mdi-tag-outline text-gray mr-1" />
+            <div class="text-sm flex-1">
+              {{ tag.name }}
+            </div>
+            <div>
+              <div class="rounded-full h-3 w-3" :style="{ backgroundColor: getTagColor(tag.name) }" />
+            </div>
+          </div>
+        </div>
         <template #trigger="{ open }">
           <div class="group text-gray-500 p-1 rounded-md i-flex-y-center h-7 w-full hover:bg-gray-100">
             <span class="i-mdi-chevron-right opacity-0 inline-block group-hover:opacity-100" :class="open ? 'rotate-90' : ''" />

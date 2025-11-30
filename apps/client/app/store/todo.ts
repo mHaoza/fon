@@ -4,6 +4,7 @@ import { ref } from 'vue'
 import { viewTemplateList } from '~/components/todo-list'
 import {
   fetchAddTodo,
+  fetchDeleteTag,
   fetchDeleteTodo,
   fetchGetDeletedTodoList,
   fetchGetTagList,
@@ -100,6 +101,21 @@ export const useTodoStore = defineStore('todo', () => {
     }
   }
 
+  /** 删除标签 */
+  async function deleteTag(tagId: string) {
+    try {
+      await fetchDeleteTag(tagId)
+      refreshTagList()
+      // 刷新所有待办列表，因为标签已从相关的 todo 中移除
+      todos.undone.refresh()
+      todos.done.refresh()
+    }
+    catch (error) {
+      console.error('删除标签失败:', error)
+      throw error
+    }
+  }
+
   /** 更新待办列表 */
   function updateTodoList(type: 'add' | 'update', todo: Todo): void
   function updateTodoList(type: 'delete' | 'removeFromDeleted', id: string): void
@@ -187,6 +203,7 @@ export const useTodoStore = defineStore('todo', () => {
     deleteTodo,
     permanentlyDeleteTodo,
     restoreTodo,
+    deleteTag,
     refreshTagList,
   }
 })

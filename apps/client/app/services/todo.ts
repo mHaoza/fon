@@ -46,3 +46,8 @@ export async function fetchRestoreTodo(id: string) {
   const response = await invoke<ApiResponse<Todo>>('restore_todo', { id })
   return ApiResponseHandler.unwrap(response)
 }
+
+export async function fetchDeleteTag(id: string) {
+  const response = await invoke<ApiResponse<void>>('delete_tag', { id })
+  return ApiResponseHandler.unwrap(response)
+}
