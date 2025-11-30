@@ -35,25 +35,6 @@ function getDefaultTodoData(): CreateTodo {
   }
 }
 
-function handleFocus() {
-  if (!todo.value.title && todoStore.activeViewInfo?.reg.test('#tag')) {
-    const tag = typeof todoStore.activeViewInfo.title === 'string' ? todoStore.activeViewInfo.title : todoStore.activeViewInfo.title(route)
-    todo.value.title = `${tag} `
-    // 设置光标位置
-    nextTick(() => {
-      const pos = tag.length
-      todoInput.value?.editorView?.dispatch({ selection: { anchor: pos, head: pos } })
-    })
-  }
-}
-
-function handleBlur() {
-  const tag = typeof todoStore.activeViewInfo?.title === 'string' ? todoStore.activeViewInfo.title : todoStore.activeViewInfo?.title(route)
-  if (todo.value.title === `${tag} `) {
-    todo.value.title = ''
-  }
-}
-
 function extractTagsFromTitle(title: string): { cleanTitle: string, tags: string[] } {
   const tagRegex = /#(\S+)\s/g
   const tags: string[] = []
@@ -66,7 +47,6 @@ function extractTagsFromTitle(title: string): { cleanTitle: string, tags: string
     match = tagRegex.exec(title)
   }
 
-  // Remove tags from title
   const cleanTitle = title.replace(/#\S+\s/g, '').trim()
 
   return { cleanTitle, tags }
@@ -80,10 +60,17 @@ async function addTodo() {
   try {
     const { cleanTitle, tags } = extractTagsFromTitle(todo.value.title)
 
+    // 如果当前视图是tag视图，自动添加该tag
+    const viewTags = []
+    if (todoStore.activeViewInfo?.reg.test('#tag')) {
+      const tag = typeof todoStore.activeViewInfo.title === 'string' ? todoStore.activeViewInfo.title : todoStore.activeViewInfo.title(route)
+      viewTags.unshift(tag.replace('#', ''))
+    }
+
     const todoData = {
       ...todo.value,
       title: cleanTitle,
-      tags: [...new Set([...todo.value.tags, ...tags])], // Merge and deduplicate tags
+      tags: [...new Set([...todo.value.tags, ...tags, ...viewTags])], // Merge and deduplicate tags
     }
 
     await todoStore.addTodo(todoData)
@@ -117,7 +104,7 @@ onUnmounted(() => {
       'bg-gray-300/10 border-transparent': !todo.title && !todoInput?.isFocused,
     }"
   >
-    <TodoInput ref="todoInput" v-model:value="todo.title" class="flex-1" @keyup.enter="addTodo" @focus="handleFocus" @blur="handleBlur">
+    <TodoInput ref="todoInput" v-model:value="todo.title" class="flex-1" @keyup.enter="addTodo">
       <template #placeholder>
         <div class="text-gray-400/90 flex items-center">
           <i class="i-lucide:plus text-icon-small mr-1" />
