@@ -12,10 +12,15 @@ const todoInput = useTemplateRef('todoInput')
 const todo = ref<CreateTodo>(getDefaultTodoData())
 
 const placeholder = computed(() => {
+  if (todoStore.activeViewInfo?.reg.test('#deleted')) {
+    return ''
+  }
+
   if (todoStore.activeViewInfo?.reg.test('#tag')) {
     const tag = typeof todoStore.activeViewInfo.title === 'string' ? todoStore.activeViewInfo.title : todoStore.activeViewInfo.title(route)
     return `添加任务至'${tag}'`
   }
+
   return '添加任务'
 })
 
@@ -97,6 +102,7 @@ onUnmounted(() => {
 
 <template>
   <div
+    v-if="placeholder"
     class="todo-input px-3 py-1 border rounded-md flex items-center"
     :class="{
       'border-blue-600': todoInput?.isFocused,
