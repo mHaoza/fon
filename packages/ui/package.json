@@ -11,6 +11,11 @@
       ]
     }
   },
+  "peerDependencies": {
+    "dayjs": "^1.11.13",
+    "lodash-es": "^4.17.21",
+    "vue": "^3.5.18"
+  },
   "dependencies": {
     "@codemirror/commands": "^6.8.1",
     "@codemirror/state": "^6.5.2",
@@ -18,17 +23,14 @@
     "@popperjs/core": "^2.11.8",
     "@zag-js/collapsible": "^1.22.1",
     "@zag-js/date-picker": "^1.21.9",
+    "@zag-js/dialog": "^1.31.1",
     "@zag-js/i18n-utils": "^1.21.9",
     "@zag-js/menu": "^1.21.9",
     "@zag-js/scroll-area": "^1.21.9",
     "@zag-js/vue": "^1.21.9",
-    "dayjs": "catalog:",
-    "lodash-es": "catalog:",
-    "vditor": "^3.11.1",
-    "vue": "catalog:"
+    "vditor": "^3.11.1"
   },
   "devDependencies": {
-    "@fon/uno-preset": "workspace:*",
-    "@vue/tsconfig": "catalog:"
+    "@vue/tsconfig": "^0.7.0"
   }
 }

@@ -1,6 +1,6 @@
-import presetDefault from '@fon/uno-preset'
 import { presetIcons, presetWind4, transformerDirectives, transformerVariantGroup } from 'unocss'
 import { defineConfig } from 'unocss/vite'
+import presetCustom from './config/unocss'
 // import { themeVars } from "./src/theme/vars";
 
 export default defineConfig({
@@ -25,7 +25,7 @@ export default defineConfig({
   transformers: [transformerDirectives(), transformerVariantGroup()],
   presets: [
     presetWind4(),
-    presetDefault(),
     presetIcons({ prefix: 'i-', warn: true }),
+    presetCustom(),
   ],
 })

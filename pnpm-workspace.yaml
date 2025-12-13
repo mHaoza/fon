@@ -1,10 +1,2 @@
 packages:
-  - './apps/*'
   - './packages/*'
-
-catalog:
-  '@types/lodash-es': ^4.17.1
-  '@vue/tsconfig': ^0.7.0
-  dayjs: ^1.11.13
-  lodash-es: ^4.17.21
-  vue: ^3.5.18
