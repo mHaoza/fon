@@ -37,7 +37,7 @@ function go(value: string | number | null) {
 }
 
 // 删除标签
-async function handleDeleteTag(tagId: string, tagName: string) {
+async function handleDeleteTag(tagId: number, tagName: string) {
   try {
     await todoStore.deleteTag(tagId)
     // 如果当前正在查看被删除的标签，跳转到"所有"视图
@@ -51,7 +51,7 @@ async function handleDeleteTag(tagId: string, tagName: string) {
 }
 
 // 获取标签菜单项
-function getTagMenuItems(tagId: string, tagName: string): FloatMenuItem[] {
+function getTagMenuItems(tagId: number, tagName: string): FloatMenuItem[] {
   return [
     {
       title: '删除标签',
@@ -65,7 +65,7 @@ function getTagMenuItems(tagId: string, tagName: string): FloatMenuItem[] {
 }
 
 // 打开标签右键菜单
-function openTagContextMenu(e: MouseEvent, tagId: string, tagName: string) {
+function openTagContextMenu(e: MouseEvent, tagId: number, tagName: string) {
   e.preventDefault()
   showFloatMenu({
     items: getTagMenuItems(tagId, tagName),

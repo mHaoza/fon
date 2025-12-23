@@ -33,6 +33,11 @@
     "core:path:default",
 
     "core:event:default",
-    "core:event:allow-unlisten"
+    "core:event:allow-unlisten",
+
+    "sql:default",
+    "sql:allow-load",
+    "sql:allow-execute",
+    "sql:allow-select"
   ]
 }

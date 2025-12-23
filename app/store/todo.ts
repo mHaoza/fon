@@ -1,34 +1,27 @@
-import type { CreateTodo, Todo } from '~/types'
+import type { Todo, TodoCreate } from '~/types'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { viewTemplateList } from '~/components/todo-list'
-import {
-  fetchAddTodo,
-  fetchDeleteTag,
-  fetchDeleteTodo,
-  fetchGetDeletedTodoList,
-  fetchGetTagList,
-  fetchGetTodoById,
-  fetchGetTodoList,
-  fetchPermanentlyDeleteTodo,
-  fetchRestoreTodo,
-  fetchUpdateTodo,
-} from '~/services/todo'
+import * as tagsDb from '~/db/tags'
+import * as todosDb from '~/db/todos'
 
 export const useTodoStore = defineStore('todo', () => {
-  const { data: tagList, refresh: refreshTagList } = useAsyncData('tagList', fetchGetTagList, {
+  const { data: tagList, refresh: refreshTagList } = useAsyncData('tagList', tagsDb.getTagList, {
     default: () => [],
   })
   const route = useRoute()
 
   const activeViewInfo = computed(() => viewTemplateList.find(item => item.reg.test(route.hash)) ?? null)
-  const activeTodoId = computed(() => route.query.todo as string ?? null)
+  const activeTodoId = computed(() => {
+    const id = route.query.todo
+    return id ? Number(id) : null
+  })
   const activeTodo = ref<Todo | null>(null)
 
   watch(activeTodoId, async (id) => {
     if (id) {
       try {
-        activeTodo.value = await fetchGetTodoById(id) ?? null
+        activeTodo.value = await todosDb.getTodoById(id) ?? null
       }
       catch {
         activeTodo.value = null
@@ -41,15 +34,15 @@ export const useTodoStore = defineStore('todo', () => {
 
   const query = computed(() => activeViewInfo.value?.query(route) ?? {})
   const todos = reactive({
-    undone: useTodoList(fetchGetTodoList, { is_done: false }, query),
-    done: useTodoList(fetchGetTodoList, { is_done: true, page: 1, page_size: 50 }, query),
-    deleted: useTodoList(fetchGetDeletedTodoList, {}, query),
+    undone: useTodoList(todosDb.getTodoList, { is_done: false }, query),
+    done: useTodoList(todosDb.getTodoList, { is_done: true, page: 1, page_size: 50 }, query),
+    deleted: useTodoList(todosDb.getDeletedTodoList, {}, query),
   })
 
   /** 新增待办 */
-  async function addTodo(todo: CreateTodo) {
+  async function addTodo(todo: TodoCreate) {
     try {
-      const result = await fetchAddTodo(todo)
+      const result = await todosDb.addTodo(todo)
       updateTodoList('add', result)
       refreshTagList()
     }
@@ -60,8 +53,8 @@ export const useTodoStore = defineStore('todo', () => {
   }
 
   /** 更新待办 */
-  async function updateTodo(todo: Parameters<typeof fetchUpdateTodo>[0]) {
-    const result = await fetchUpdateTodo(todo)
+  async function updateTodo(todo: Parameters<typeof todosDb.updateTodo>[0]) {
+    const result = await todosDb.updateTodo(todo)
 
     updateTodoList('update', result)
     if (activeTodoId.value === result.id) {
@@ -72,24 +65,24 @@ export const useTodoStore = defineStore('todo', () => {
   }
 
   /** 删除待办 */
-  async function deleteTodo(id: string) {
-    await fetchDeleteTodo(id)
+  async function deleteTodo(id: number) {
+    await todosDb.deleteTodo(id)
     updateTodoList('delete', id)
     refreshTagList()
   }
 
   /** 永久删除待办 */
-  async function permanentlyDeleteTodo(id: string) {
-    await fetchPermanentlyDeleteTodo(id)
+  async function permanentlyDeleteTodo(id: number) {
+    await todosDb.permanentlyDeleteTodo(id)
     // 永久删除仅需从 deleted 列表移除
     updateTodoList('removeFromDeleted', id)
     refreshTagList()
   }
 
   /** 恢复待办 */
-  async function restoreTodo(id: string) {
+  async function restoreTodo(id: number) {
     try {
-      const result = await fetchRestoreTodo(id)
+      const result = await todosDb.restoreTodo(id)
       updateTodoList('add', result)
       // 从 deleted 列表移除
       updateTodoList('removeFromDeleted', id)
@@ -102,9 +95,9 @@ export const useTodoStore = defineStore('todo', () => {
   }
 
   /** 删除标签 */
-  async function deleteTag(tagId: string) {
+  async function deleteTag(tagId: number) {
     try {
-      await fetchDeleteTag(tagId)
+      await tagsDb.deleteTag(tagId)
       refreshTagList()
       // 刷新所有待办列表，因为标签已从相关的 todo 中移除
       todos.undone.refresh()
@@ -118,14 +111,14 @@ export const useTodoStore = defineStore('todo', () => {
 
   /** 更新待办列表 */
   function updateTodoList(type: 'add' | 'update', todo: Todo): void
-  function updateTodoList(type: 'delete' | 'removeFromDeleted', id: string): void
-  function updateTodoList(type: 'add' | 'update' | 'delete' | 'removeFromDeleted', todoOrId: Todo | string) {
-    if (type === 'add' && typeof todoOrId !== 'string') {
+  function updateTodoList(type: 'delete' | 'removeFromDeleted', id: number): void
+  function updateTodoList(type: 'add' | 'update' | 'delete' | 'removeFromDeleted', todoOrId: Todo | number) {
+    if (type === 'add' && typeof todoOrId !== 'number') {
       // 按照 created_at DESC 排序插入到正确位置
       const targetList = todoOrId.is_done ? todos.done.list : todos.undone.list
       insertTodoInSortedOrder(targetList, todoOrId)
     }
-    else if (type === 'update' && typeof todoOrId !== 'string') {
+    else if (type === 'update' && typeof todoOrId !== 'number') {
       const todo = todoOrId
 
       // 检查 todo 在 undone 列表中是否存在且已完成

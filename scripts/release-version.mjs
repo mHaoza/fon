@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * CLI tool to update version numbers in package.json, apps/client/src-tauri/Cargo.toml, and apps/client/src-tauri/tauri.conf.json.
+ * CLI tool to update version numbers in package.json, src-tauri/Cargo.toml, and src-tauri/tauri.conf.json.
  *
  * Usage:
  *   pnpm release-version <version>
@@ -25,11 +25,10 @@
  * The script will:
  *   - Validate and normalize the version argument
  *   - Update the version field in package.json (root)
- *   - Update the version field in apps/client/package.json
- *   - Update the version field in apps/client/src-tauri/Cargo.toml
- *   - Update the version field in apps/client/src-tauri/tauri.conf.json
+ *   - Update the version field in src-tauri/Cargo.toml
+ *   - Update the version field in src-tauri/Cargo.lock
+ *   - Update the version field in src-tauri/tauri.conf.json
  *   - Update the version field in packages/ui/package.json
- *   - Update the version field in packages/uno-preset/package.json
  *
  * Errors are logged and the process exits with code 1 on failure.
  */
@@ -134,7 +133,7 @@ async function updatePackageVersion(packagePath, newVersion) {
  * @param {string} newVersion
  */
 async function updateCargoVersion(newVersion) {
-  const cargoTomlPath = path.join(process.cwd(), 'apps/client/src-tauri/Cargo.toml')
+  const cargoTomlPath = path.join(process.cwd(), 'src-tauri/Cargo.toml')
   try {
     if (!(await fs.access(cargoTomlPath).then(() => true).catch(() => false))) {
       console.warn('[WARN]: Cargo.toml not found, skipping')
@@ -166,7 +165,7 @@ async function updateCargoVersion(newVersion) {
  * @param {string} newVersion
  */
 async function updateCargoLockVersion(newVersion) {
-  const cargoLockPath = path.join(process.cwd(), 'Cargo.lock')
+  const cargoLockPath = path.join(process.cwd(), 'src-tauri/Cargo.lock')
   try {
     if (!(await fs.access(cargoLockPath).then(() => true).catch(() => false))) {
       console.warn('[WARN]: Cargo.lock not found, skipping')
@@ -203,7 +202,7 @@ async function updateCargoLockVersion(newVersion) {
  * @param {string} newVersion
  */
 async function updateTauriConfigVersion(newVersion) {
-  const tauriConfigPath = path.join(process.cwd(), 'apps/client/src-tauri/tauri.conf.json')
+  const tauriConfigPath = path.join(process.cwd(), 'src-tauri/tauri.conf.json')
   try {
     if (!(await fs.access(tauriConfigPath).then(() => true).catch(() => false))) {
       console.warn('[WARN]: tauri.conf.json not found, skipping')
@@ -290,9 +289,7 @@ async function main(versionArg) {
 
     // 更新所有相关文件的版本
     await updatePackageVersion('package.json', newVersion)
-    await updatePackageVersion('apps/client/package.json', newVersion)
     await updatePackageVersion('packages/ui/package.json', newVersion)
-    await updatePackageVersion('packages/uno-preset/package.json', newVersion)
     await updateCargoVersion(newVersion)
     await updateCargoLockVersion(newVersion)
     await updateTauriConfigVersion(newVersion)

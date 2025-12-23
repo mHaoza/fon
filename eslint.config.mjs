@@ -6,7 +6,7 @@ export default withNuxt(
     {
       vue: true,
       unocss: true,
-      ignores: ['.nuxt/', '.output/', 'dist', 'node_modules'],
+      ignores: ['.nuxt/', '.output/', 'dist', 'node_modules', 'src-tauri/'],
       formatters: {
         /**
          * Format CSS, LESS, SCSS files, also the `<style>` blocks in Vue
@@ -26,6 +26,11 @@ export default withNuxt(
         markdown: 'prettier',
       },
     },
-    { rules: { 'node/prefer-global/process': 'off' } },
+    {
+      rules: {
+        'node/prefer-global/process': 'off',
+        'antfu/no-top-level-await': 'off',
+      },
+    },
   ),
 )

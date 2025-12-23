@@ -1,27 +1,8 @@
-export interface Todo {
-  id: string
-  title: string
-  date: number | null
-  repeat: 'never' | 'daily' | 'weekly' | 'monthly'
-  end_repeat_type: 'always' | 'date' | 'count' | null
-  end_repeat_date: number | null
-  remaining_count: number | null
-  content: string
-  tags: string[]
-  category: string | null
-  is_done: boolean
-  is_deleted: boolean
-  created_at: number
-  updated_at: number
-}
+// 从数据库层导入并导出类型
+import type { Tag } from '~/db/tags'
+import type { Todo, TodoCreate, TodoListQuery } from '~/db/todos'
 
-export type CreateTodo = Omit<Todo, 'id' | 'created_at' | 'updated_at'>
-
-export interface Tag {
-  id: string
-  name: string
-  created_at: number
-}
+export type { Tag, Todo, TodoCreate, TodoListQuery }
 
 // 统一的API响应结构
 export interface ApiResponse<T> {
@@ -43,47 +24,9 @@ export interface PaginationListResponse<T> {
   data: T[]
 }
 
-export interface TodoListQuery {
+export interface ListQuery {
   page?: number
   page_size?: number
-  tags?: string[]
-  category?: string
-  is_done?: boolean
-  sort?: keyof Todo
+  sort?: string
   order?: 'asc' | 'desc'
-}
-
-// -------- 视图/分区模型（新的筛选架构） --------
-export interface TodoSectionConfig {
-  key: string
-  title?: string
-  defaultOpen?: boolean
-  paginated?: boolean
-  pageSize?: number
-  /** 在服务端查询参数基础上叠加的分区级查询 */
-  query?: Partial<TodoListQuery>
-  /** 客户端额外过滤（可选） */
-  extraFilter?: (todo: Todo) => boolean
-}
-
-export interface TodoViewConfig {
-  key: string
-  label: string
-  icon?: string
-  /** 视图的基础查询参数 */
-  baseQuery: TodoListQuery
-  sections: TodoSectionConfig[]
-}
-
-export interface TodoSectionState {
-  key: string
-  title?: string
-  open: boolean
-  items: Todo[]
-  total: number
-  page: number | null
-  loading: boolean
-  error: string | null
-  paginated: boolean
-  pageSize: number | null
 }

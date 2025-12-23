@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CreateTodo } from '@/types'
+import type { TodoCreate } from '@/types'
 // import DatePicker from '@/components/DatePicker'
 import { TodoInput } from '@fon/ui'
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow'
@@ -9,7 +9,7 @@ import { useTodoStore } from '~/store/todo'
 const route = useRoute()
 const todoStore = useTodoStore()
 const todoInput = useTemplateRef('todoInput')
-const todo = ref<CreateTodo>(getDefaultTodoData())
+const todo = ref<TodoCreate>(getDefaultTodoData())
 
 const placeholder = computed(() => {
   if (todoStore.activeViewInfo?.reg.test('#deleted')) {
@@ -24,7 +24,7 @@ const placeholder = computed(() => {
   return '添加任务'
 })
 
-function getDefaultTodoData(): CreateTodo {
+function getDefaultTodoData(): TodoCreate {
   return {
     title: '',
     date: null,

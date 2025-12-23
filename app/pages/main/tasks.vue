@@ -2,7 +2,6 @@
 import { MdEditor } from '@fon/ui'
 import { resourceDir } from '@tauri-apps/api/path'
 import { debounce } from 'lodash-es'
-import { nanoid } from 'nanoid'
 import { useTodoStore } from '~/store/todo'
 
 const todoStore = useTodoStore()
@@ -23,9 +22,11 @@ const customUpload = {
     const filterFileList = fileList.filter(file => isImageFile(guessMimeType(file.name)))
     const fileInfoList = await Promise.all(filterFileList.map(async (file) => {
       const content = await fileToUint8Array(file)
+      const timestamp = Date.now()
+      const random = Math.random().toString(36).substring(2, 15)
       const result = await uploadFile({
         name: file.name,
-        path: `/todos/${todoStore.activeTodo!.id}/${nanoid()}.${getFileExtension(file.name)}`,
+        path: `/todos/${todoStore.activeTodo!.id}/${timestamp}_${random}.${getFileExtension(file.name)}`,
         content: Array.from(content),
       })
       return result

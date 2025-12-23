@@ -10,7 +10,7 @@ const todoInputRef = useTemplateRef('todoInputRef')
 const todo = defineModel<Todo>('todo', { required: true })
 
 const todoStore = useTodoStore()
-const focusedTodo = ref<string | null>(null)
+const focusedTodo = ref<number | null>(null)
 
 function handleTodoClick(e: MouseEvent, todo: Todo) {
   const pos = document.caretPositionFromPoint(e.clientX, e.clientY)
@@ -33,13 +33,13 @@ async function updateTodoTitle(todo: Todo) {
 }
 
 const router = useRouter()
-function setActiveTodo(todoId?: string | null) {
+function setActiveTodo(todoId?: number | null) {
   router.push({
     path: router.currentRoute.value.path,
     hash: router.currentRoute.value.hash,
     query: {
       ...router.currentRoute.value.query,
-      todo: todoId || '',
+      todo: todoId?.toString() || '',
     },
   })
 }
