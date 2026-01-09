@@ -10,11 +10,13 @@ import { useTodoStore } from '~/store/todo'
 import { getLocalFilePath, isNetworkUrl } from '~/utils/path'
 import { useEditorSuggestions } from './composables/useEditorSuggestions'
 import { useEditorToolbar } from './composables/useEditorToolbar'
+import { handleFileUpload } from './composables/useFileUploadHandler'
 import CustomFile from './CustomFile'
 import CustomImage from './CustomImage'
-import FileUpload from './FileUpload'
 import ImageUpload from './ImageUpload'
 import LinkPopover from './LinkPopover.vue'
+
+const todoStore = useTodoStore()
 
 // Custom handlers for editor
 const customHandlers = {
@@ -24,18 +26,21 @@ const customHandlers = {
     isActive: (editor: Editor) => editor.isActive('imageUpload'),
     isDisabled: undefined,
   },
-  fileUpload: {
-    canExecute: (editor: Editor) => editor.can().insertContent({ type: 'fileUpload' }),
-    execute: (editor: Editor) => editor.chain().focus().insertContent({ type: 'fileUpload' }),
-    isActive: (editor: Editor) => editor.isActive('fileUpload'),
+  file: {
+    canExecute: (_editor: Editor) => true,
+    execute: (editor: Editor) => {
+      const todoId = todoStore.activeTodo?.id
+      if (todoId) {
+        handleFileUpload(editor, todoId)
+      }
+    },
+    isActive: (editor: Editor) => editor.isActive('file'),
     isDisabled: undefined,
   },
 } satisfies EditorCustomHandlers
 
 const { items: suggestionItems } = useEditorSuggestions(customHandlers)
 const { bubbleToolbarItems, getImageToolbarItems } = useEditorToolbar(customHandlers)
-
-const todoStore = useTodoStore()
 
 const content = computed({
   get: () => todoStore.activeTodo?.content || null,
@@ -66,7 +71,6 @@ const extensions = computed(() => [
   CustomImage,
   CustomFile,
   ImageUpload,
-  FileUpload,
   CodeBlockShiki.configure({
     defaultTheme: 'material-theme',
     themes: {
@@ -174,7 +178,7 @@ defineExpose({ focus: () => editorRef.value?.editor?.commands.focus('end') })
         :items="bubbleToolbarItems"
         layout="bubble"
         :should-show="({ editor, view, state }: any) => {
-          if (editor.isActive('imageUpload') || editor.isActive('image') || editor.isActive('fileUpload') || editor.isActive('file')) {
+          if (editor.isActive('imageUpload') || editor.isActive('image') || editor.isActive('file')) {
             return false
           }
           const { selection } = state

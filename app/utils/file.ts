@@ -1,32 +1,5 @@
-import { BaseDirectory, exists, mkdir, readDir, remove, writeFile } from '@tauri-apps/plugin-fs'
-
-const ROOT_DIR = 'resources'
-const BASE_DIR = BaseDirectory.Resource
-
-/** 上传文件（写入 $RESOURCE 目录） */
-export async function uploadFile(request: {
-  name: string
-  path: string
-  content: number[] // Uint8Array 转换为 number[]
-}) {
-  const relativePath = `${ROOT_DIR}/${request.path}`.replace(/\\/g, '/').replace(/\/\//g, '/')
-
-  // 确保目录存在
-  const dir = relativePath.includes('/') ? relativePath.substring(0, relativePath.lastIndexOf('/')) : ''
-  if (dir) {
-    try {
-      await mkdir(dir, { baseDir: BASE_DIR, recursive: true })
-    }
-    catch {}
-  }
-
-  await writeFile(relativePath, new Uint8Array(request.content), { baseDir: BASE_DIR })
-
-  return {
-    name: request.name,
-    path: `/${relativePath}`,
-  }
-}
+import { exists, readDir, remove } from '@tauri-apps/plugin-fs'
+import { useSettingStore } from '~/store/setting'
 
 /**
  * 获取文件列表（遍历 $RESOURCE/[subPath]）
@@ -35,10 +8,11 @@ export async function uploadFile(request: {
  * const fileList = await getFileList('todos/a9105c66-fbf7-4be3-96f9-d2dac7a6448d')
  */
 export async function getFileList(subPath?: string) {
-  const base = subPath && subPath.length > 0 ? `${ROOT_DIR}/${subPath}` : ROOT_DIR
+  const settingStore = useSettingStore()
+  const base = subPath && subPath.length > 0 ? `${settingStore.RESOURCE_DIR}/${subPath}` : settingStore.RESOURCE_DIR
   const items: { name: string, path: string }[] = []
 
-  const entries = await readDir(base, { baseDir: BASE_DIR })
+  const entries = await readDir(base, { baseDir: settingStore.BASE_DIR })
   for (const entry of entries) {
     if (!entry.isFile) {
       continue
@@ -53,12 +27,14 @@ export async function getFileList(subPath?: string) {
 
 /** 删除文件 */
 export async function deleteFile(path: string): Promise<void> {
-  await remove(path, { baseDir: BASE_DIR })
+  const settingStore = useSettingStore()
+  await remove(path, { baseDir: settingStore.BASE_DIR })
 }
 
 /** 检查文件是否存在 */
 export async function fileExists(path: string): Promise<boolean> {
-  return await exists(path, { baseDir: BASE_DIR })
+  const settingStore = useSettingStore()
+  return await exists(path, { baseDir: settingStore.BASE_DIR })
 }
 
 /** 将文件转换为 Uint8Array */

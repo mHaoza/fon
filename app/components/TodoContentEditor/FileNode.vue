@@ -8,6 +8,7 @@ const props = defineProps<NodeViewProps>()
 
 const path = computed(() => props.node.attrs.path || '')
 const name = computed(() => props.node.attrs.name || '')
+const loading = computed(() => props.node.attrs.loading || false)
 
 // 根据文件扩展名获取图标
 const fileIcon = computed(() => {
@@ -70,13 +71,13 @@ const fileIcon = computed(() => {
 // 处理点击事件
 async function handleClick() {
   try {
-    // 如果是网络链接，使用浏览器打开
+    // 如果是网络链接,使用浏览器打开
     if (isNetworkUrl(path.value)) {
       await openUrl(path.value)
       return
     }
 
-    // 本地文件，获取绝对路径后打开
+    // 本地文件,获取绝对路径后打开
     const localPath = await getLocalFilePath(path.value)
     await openPath(localPath)
   }
@@ -89,15 +90,17 @@ async function handleClick() {
 <template>
   <NodeViewWrapper class="my-0!">
     <div
-      class="inline-flex items-center gap-2 cursor-pointer hover:opacity-80 hover:underline transition-opacity"
+      class="inline-flex items-center gap-2 text-secondary-400 cursor-pointer hover:underline transition-opacity"
+      :class="{ 'bg-primary/20': props.selected, 'opacity-60': loading }"
       :title="name"
       @click="handleClick"
     >
       <UIcon
-        :name="fileIcon"
-        class="text-lg text-gray-600 dark:text-gray-400 shrink-0"
+        :name="loading ? 'i-lucide-loader-circle' : fileIcon"
+        :class="[loading && 'animate-spin']"
+        class="text-lg shrink-0 flex items-center"
       />
-      <span class="text-gray-900 dark:text-gray-100 truncate max-w-xs">
+      <span class="truncate max-w-xs leading-none">
         {{ name }}
       </span>
     </div>

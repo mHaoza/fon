@@ -21,13 +21,12 @@ const customUpload = {
   async handler(fileList: File[]) {
     const filterFileList = fileList.filter(file => isImageFile(guessMimeType(file.name)))
     const fileInfoList = await Promise.all(filterFileList.map(async (file) => {
-      const content = await fileToUint8Array(file)
       const timestamp = Date.now()
       const random = Math.random().toString(36).substring(2, 15)
       const result = await uploadFile({
         name: file.name,
         path: `/todos/${todoStore.activeTodo!}/${timestamp}_${random}.${getFileExtension(file.name)}`,
-        content: Array.from(content),
+        file,
       })
       return result
     }))

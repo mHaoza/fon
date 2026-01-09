@@ -61,7 +61,7 @@ onMounted(async () => {
           tr.delete(range.from, range.to)
           return true
         })
-        .run()
+        // .run()
 
       // 插入标签
       insertTag(editor, item as TagMenuItem)

@@ -2,7 +2,7 @@
 import type { NodeViewProps } from '@tiptap/vue-3'
 import { NodeViewWrapper } from '@tiptap/vue-3'
 import { useTodoStore } from '~/store/todo'
-import { fileToUint8Array, uploadFile } from '~/utils/file'
+import { uploadFile } from '~/utils/file'
 import { generateFilenameWithConflictResolution } from '~/utils/path'
 
 const props = defineProps<NodeViewProps>()
@@ -18,9 +18,6 @@ watch(file, async (newFile) => {
   loading.value = true
 
   try {
-    // 将文件转换为 Uint8Array
-    const content = await fileToUint8Array(newFile)
-
     // 获取当前活动的 todo ID
     const todoId = todoStore.activeTodo?.id
     if (!todoId) {
@@ -36,7 +33,7 @@ watch(file, async (newFile) => {
     const result = await uploadFile({
       name: newFile.name,
       path: `todos/${todoId}/${filename}`,
-      content: Array.from(content),
+      file: newFile,
     })
 
     const pos = props.getPos()

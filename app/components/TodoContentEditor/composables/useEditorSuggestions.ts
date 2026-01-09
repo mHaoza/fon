@@ -61,6 +61,11 @@ export function useEditorSuggestions<T extends EditorCustomHandlers>(_customHand
         label: 'Horizontal Rule',
         icon: 'i-lucide-separator-horizontal',
       },
+      {
+        kind: 'file',
+        label: 'File',
+        icon: 'i-lucide-paperclip',
+      },
     ],
   ] satisfies EditorSuggestionMenuItem<T>[][]
 

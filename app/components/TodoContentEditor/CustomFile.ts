@@ -6,7 +6,8 @@ import FileNodeComponent from './FileNode.vue'
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     file: {
-      insertFileNode: (attrs: { path: string, name: string }) => ReturnType
+      insertFileNode: (attrs: { path?: string, name: string, loading?: boolean }) => ReturnType
+      updateFileNode: (attrs: { path?: string, name?: string, loading?: boolean }) => ReturnType
     }
   }
 }
@@ -38,6 +39,13 @@ export default Node.create({
           'data-name': attributes.name,
         }),
       },
+      loading: {
+        default: false,
+        parseHTML: element => element.getAttribute('data-loading') === 'true',
+        renderHTML: attributes => ({
+          'data-loading': attributes.loading ? 'true' : 'false',
+        }),
+      },
     }
   },
 
@@ -60,8 +68,15 @@ export default Node.create({
       insertFileNode: attrs => ({ commands }) => {
         return commands.insertContent({
           type: this.name,
-          attrs,
+          attrs: {
+            path: attrs.path || '',
+            name: attrs.name,
+            loading: attrs.loading ?? false,
+          },
         })
+      },
+      updateFileNode: attrs => ({ commands }) => {
+        return commands.updateAttributes(this.name, attrs)
       },
     }
   },
@@ -69,7 +84,7 @@ export default Node.create({
   // 使用 Pandoc 风格的 Markdown 规范
   ...createBlockMarkdownSpec({
     nodeName: 'file',
-    defaultAttributes: { path: '', name: '' },
-    allowedAttributes: ['path', 'name'],
+    defaultAttributes: { path: '', name: '', loading: false },
+    allowedAttributes: ['path', 'name', 'loading'],
   }),
 })
