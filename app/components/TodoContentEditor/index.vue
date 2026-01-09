@@ -4,7 +4,6 @@ import type { Editor } from '@tiptap/core'
 import { openPath, openUrl } from '@tauri-apps/plugin-opener'
 import { TaskItem, TaskList } from '@tiptap/extension-list'
 import { TableKit } from '@tiptap/extension-table'
-import TextAlign from '@tiptap/extension-text-align'
 import { debounce } from 'lodash-es'
 import { CellSelection } from 'prosemirror-tables'
 import { CodeBlockShiki } from 'tiptap-extension-code-block-shiki'
@@ -70,9 +69,6 @@ const extensions = computed(() => [
       light: 'material-theme-lighter',
       dark: 'material-theme-palenight',
     },
-  }),
-  TextAlign.configure({
-    types: ['heading', 'paragraph'],
   }),
   TaskList,
   TaskItem.configure({
