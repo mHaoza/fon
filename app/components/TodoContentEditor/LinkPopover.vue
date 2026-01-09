@@ -11,13 +11,15 @@ const url = ref('')
 
 const active = computed(() => props.editor.isActive('link'))
 const disabled = computed(() => {
-  if (!props.editor.isEditable) return true
+  if (!props.editor.isEditable)
+    return true
   const { selection } = props.editor.state
   return selection.empty && !props.editor.isActive('link')
 })
 
 watch(() => props.editor, (editor, _, onCleanup) => {
-  if (!editor) return
+  if (!editor)
+    return
 
   const updateUrl = () => {
     const { href } = editor.getAttributes('link')
@@ -39,16 +41,26 @@ watch(active, (isActive) => {
 })
 
 function setLink() {
-  if (!url.value) return
+  if (!url.value) {
+    return
+  }
 
   const { selection } = props.editor.state
   const isEmpty = selection.empty
+  const hasCode = props.editor.isActive('code')
 
   let chain = props.editor.chain().focus()
-  chain = chain.extendMarkRange('link').setLink({ href: url.value })
 
-  if (isEmpty) {
-    chain = chain.insertContent({ type: 'text', text: url.value })
+  // When linking code, extend the code mark range first to select the full code
+  if (hasCode && !isEmpty) {
+    chain = chain.extendMarkRange('code').setLink({ href: url.value })
+  }
+  else {
+    chain = chain.extendMarkRange('link').setLink({ href: url.value })
+
+    if (isEmpty) {
+      chain = chain.insertContent({ type: 'text', text: url.value })
+    }
   }
 
   chain.run()
@@ -69,7 +81,8 @@ function removeLink() {
 }
 
 function openLink() {
-  if (!url.value) return
+  if (!url.value)
+    return
   window.open(url.value, '_blank', 'noopener,noreferrer')
 }
 
