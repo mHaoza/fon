@@ -24,7 +24,7 @@ export async function uploadFile(request: {
 
   return {
     name: request.name,
-    path: relativePath,
+    path: `/${relativePath}`,
   }
 }
 

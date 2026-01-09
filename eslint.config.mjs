@@ -1,11 +1,10 @@
-import antfn from '@antfu/eslint-config'
+import antfu from '@antfu/eslint-config'
 import withNuxt from './.nuxt/eslint.config.mjs'
 
 export default withNuxt(
-  antfn(
+  antfu(
     {
       vue: true,
-      unocss: true,
       ignores: ['.nuxt/', '.output/', 'dist', 'node_modules', 'src-tauri/'],
       formatters: {
         /**

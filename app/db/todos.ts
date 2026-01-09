@@ -13,8 +13,8 @@ export interface Todo {
   content: string
   tags: string[]
   category: string | null
-  is_done: boolean
-  is_deleted: boolean
+  is_done: number
+  is_deleted: number
   created_at: number
   updated_at: number
 }
@@ -24,7 +24,7 @@ export type TodoCreate = Omit<Todo, 'id' | 'created_at' | 'updated_at'>
 export interface TodoListQuery extends ListQuery {
   tags?: string[]
   category?: string
-  is_done?: boolean
+  is_done?: number
   sort?: keyof Todo
 }
 

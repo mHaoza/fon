@@ -3,23 +3,18 @@ import type { PaginationListResponse, Todo, TodoListQuery } from '~/types'
 export function useTodoList(
   getListFn: (data: TodoListQuery) => Promise<PaginationListResponse<Todo>>,
   queryInfo?: TodoListQuery,
-  extraQueryInfo?: ComputedRef<TodoListQuery>,
 ) {
   const list = ref<Todo[]>([])
   const query = ref(defaultQuery())
   const total = ref(Infinity)
 
   function defaultQuery() {
-    return {
-      ...queryInfo,
-      ...extraQueryInfo?.value,
-    }
+    return { ...queryInfo }
   }
 
-  async function refresh() {
-    query.value = defaultQuery()
-    const result = await getListFn(query.value)
-
+  async function refresh(queryInfo?: TodoListQuery) {
+    query.value = { ...defaultQuery(), ...(queryInfo ?? {}) }
+    const result = await getListFn({ ...query.value })
     list.value = result.data
     total.value = result.total
   }

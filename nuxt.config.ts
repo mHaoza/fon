@@ -1,3 +1,4 @@
+import tailwindcss from '@tailwindcss/vite'
 import { defineNuxtConfig } from 'nuxt/config'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
@@ -8,12 +9,24 @@ export default defineNuxtConfig({
   ssr: false,
   devServer: { host: 'localhost' },
   vite: {
-    plugins: [],
+    plugins: [
+      tailwindcss(),
+    ],
     clearScreen: false,
     // 启用环境变量
     envPrefix: ['VITE_'],
+    optimizeDeps: {
+      include: [
+        'prosemirror-state',
+        'prosemirror-view',
+      ],
+    },
   },
-  modules: ['@unocss/nuxt', '@nuxt/eslint', '@pinia/nuxt'],
+  modules: ['@nuxt/eslint', '@pinia/nuxt', '@nuxt/ui'],
+  // 配置自动导入
+  imports: {
+    dirs: ['utils/*'],
+  },
   // ignore: ['app/pages/**/modules/**'],
   css: ['~/assets/styles/main.css'],
   eslint: {
@@ -21,13 +34,18 @@ export default defineNuxtConfig({
       standalone: false,
     },
   },
-  hooks: {
-    'pages:extend': function (pages) {
-      // 移除modules路由
-      const index = pages.findIndex(page => /\/modules\//.test(page.path))
-      if (index >= 0) {
-        pages.splice(index, 1)
-      }
+  // 禁用 Nuxt UI 的在线图标获取，避免访问 Google Fonts
+  ui: {
+    fonts: false,
+    colorMode: false,
+    experimental: {
+      componentDetection: true,
+    },
+  },
+  icon: {
+    clientBundle: {
+      // 扫描并打包使用的图标到客户端
+      scan: true,
     },
   },
 })

@@ -7,10 +7,6 @@ export default <RouterConfig>{
     if (savedPosition) {
       return savedPosition
     }
-
-    // 不处理 hash 滚动，因为我们的 hash 用于视图切换而不是页面锚点
-    // 这样可以避免浏览器尝试查找类似 #tag/xxx 这样包含特殊字符的 id
     return { top: 0 }
   },
 }
-

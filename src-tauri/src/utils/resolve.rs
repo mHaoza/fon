@@ -54,7 +54,7 @@ pub fn create_main_window() {
         let window = tauri::WebviewWindowBuilder::new(
             &app_handle,
             "main",
-            tauri::WebviewUrl::App("/main".into()),
+            tauri::WebviewUrl::App("/main/todo/all".into()),
         )
         .title("main") // 窗口标题
         .inner_size(1200.0, 800.0) // 窗口大小

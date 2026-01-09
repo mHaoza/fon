@@ -5,8 +5,8 @@
     // iconify
     "afzalsayed96.icones",
     "antfu.iconify",
-    // unocss
-    "antfu.unocss",
+    // tailwindcss
+    "bradlc.vscode-tailwindcss",
     // tauri
     "tauri-apps.tauri-vscode",
     // other...
