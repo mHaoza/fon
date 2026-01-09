@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import type { EditorCustomHandlers } from '@nuxt/ui'
 import type { Editor } from '@tiptap/core'
-import { openPath, openUrl } from '@tauri-apps/plugin-opener'
+import { openUrl } from '@tauri-apps/plugin-opener'
 import { TaskItem, TaskList } from '@tiptap/extension-list'
 import { TableKit } from '@tiptap/extension-table'
 import { debounce } from 'lodash-es'
 import { CellSelection } from 'prosemirror-tables'
 import { CodeBlockShiki } from 'tiptap-extension-code-block-shiki'
 import { useTodoStore } from '~/store/todo'
-import { getLocalFilePath, isNetworkUrl } from '~/utils/path'
 import { useEditorSuggestions } from './composables/useEditorSuggestions'
 import { useEditorToolbar } from './composables/useEditorToolbar'
 import { handleFileUpload } from './composables/useFileUploadHandler'
@@ -92,30 +91,10 @@ const editorContainerRef = ref<HTMLElement>()
 
 // 处理点击链接事件
 async function handleLinkClick(event: MouseEvent) {
-  const target = event.target as HTMLElement
-  const link = target.closest('a[data-local-file="true"]')
-
-  if (link) {
-    event.preventDefault()
-    const href = link.getAttribute('href')
-
-    if (!href)
-      return
-
-    try {
-      // 如果是网络链接，使用浏览器打开
-      if (isNetworkUrl(href)) {
-        await openUrl(href)
-        return
-      }
-
-      // 本地附件，获取绝对路径后打开
-      const localPath = await getLocalFilePath(href)
-      await openPath(localPath)
-    }
-    catch (err) {
-      console.error('打开附件失败:', err)
-    }
+  event.preventDefault()
+  const href = (event.target as HTMLElement)?.closest('a')?.getAttribute('href')
+  if (href) {
+    await openUrl(`//${href}`)
   }
 }
 
@@ -145,7 +124,7 @@ defineExpose({ focus: () => editorRef.value?.editor?.commands.focus('end') })
       :model-value="content"
       content-type="markdown"
       :extensions="extensions"
-      :starter-kit="{ codeBlock: false, link: false }"
+      :starter-kit="{ codeBlock: false }"
       :image="false"
       :handlers="customHandlers"
       placeholder="输入内容或使用 / 快速插入..."

@@ -15,7 +15,6 @@
     "core:window:allow-close",
     "core:window:allow-hide",
     "core:event:allow-listen",
-
     "fs:default",
     "fs:allow-exists",
     "fs:allow-read",
@@ -28,18 +27,14 @@
     "fs:allow-resource-write-recursive",
     "fs:scope-applocaldata-recursive",
     "fs:allow-applocaldata-write-recursive",
-
     "core:path:allow-resolve-directory",
     "core:path:default",
-
     "core:event:default",
     "core:event:allow-unlisten",
-
     "sql:default",
     "sql:allow-load",
     "sql:allow-execute",
     "sql:allow-select",
-
     "opener:default",
     {
       "identifier": "opener:allow-open-path",
@@ -52,7 +47,8 @@
     {
       "identifier": "opener:allow-open-url",
       "allow": [
-        {  "path": "/**"
+        {
+          "url": "**"
         }
       ]
     }
