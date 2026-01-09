@@ -35,6 +35,9 @@ importers:
       '@tiptap/extension-emoji':
         specifier: ^3.14.0
         version: 3.14.0(@tiptap/core@3.15.3(@tiptap/pm@3.15.3))(@tiptap/pm@3.15.3)(@tiptap/suggestion@3.15.3(@tiptap/core@3.15.3(@tiptap/pm@3.15.3))(@tiptap/pm@3.15.3))(emojibase@17.0.0)
+      '@tiptap/extension-table':
+        specifier: ^3.15.3
+        version: 3.15.3(@tiptap/core@3.15.3(@tiptap/pm@3.15.3))(@tiptap/pm@3.15.3)
       '@tiptap/extension-text-align':
         specifier: ^3.14.0
         version: 3.14.0(@tiptap/core@3.15.3(@tiptap/pm@3.15.3))
@@ -2051,6 +2054,12 @@ packages:
     resolution: {integrity: sha512-Y1P3eGNY7RxQs2BcR6NfLo9VfEOplXXHAqkOM88oowWWOE7dMNeFFZM9H8HNxoQgXJ7H0aWW9B7ZTWM9hWli2Q==}
     peerDependencies:
       '@tiptap/core': ^3.15.3
+
+  '@tiptap/extension-table@3.15.3':
+    resolution: {integrity: sha512-dJk0u2JX1J/3x/ps641qdxQPOiie5txQhs2M1srgDeeFu//ORCePAxryJCw1bgf0TEVwFWwFTCtcOFR5SSgMZQ==}
+    peerDependencies:
+      '@tiptap/core': ^3.15.3
+      '@tiptap/pm': ^3.15.3
 
   '@tiptap/extension-text-align@3.14.0':
     resolution: {integrity: sha512-CaxxlbAvfofZZ7KPL28Kg8xuMv8t4rvt5GPwZAqE+jd3rwrucpovpX/SdgclYDc75xs0t8qeoxDFe9HQmG5XZA==}
@@ -7956,6 +7965,11 @@ snapshots:
   '@tiptap/extension-strike@3.15.3(@tiptap/core@3.15.3(@tiptap/pm@3.15.3))':
     dependencies:
       '@tiptap/core': 3.15.3(@tiptap/pm@3.15.3)
+
+  '@tiptap/extension-table@3.15.3(@tiptap/core@3.15.3(@tiptap/pm@3.15.3))(@tiptap/pm@3.15.3)':
+    dependencies:
+      '@tiptap/core': 3.15.3(@tiptap/pm@3.15.3)
+      '@tiptap/pm': 3.15.3
 
   '@tiptap/extension-text-align@3.14.0(@tiptap/core@3.15.3(@tiptap/pm@3.15.3))':
     dependencies:

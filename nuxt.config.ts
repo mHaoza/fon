@@ -18,6 +18,7 @@ export default defineNuxtConfig({
     optimizeDeps: {
       include: [
         'prosemirror-state',
+        'prosemirror-tables',
         'prosemirror-view',
       ],
     },

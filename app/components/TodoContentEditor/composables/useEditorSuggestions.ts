@@ -1,7 +1,7 @@
 import type { EditorCustomHandlers, EditorSuggestionMenuItem } from '@nuxt/ui'
 
 export function useEditorSuggestions<T extends EditorCustomHandlers>(_customHandlers?: T) {
-  const items = [
+  const suggestionItems = [
     [
       {
         type: 'label',
@@ -62,6 +62,11 @@ export function useEditorSuggestions<T extends EditorCustomHandlers>(_customHand
         label: 'Insert',
       },
       {
+        kind: 'table',
+        label: 'Table',
+        icon: 'i-lucide-table',
+      },
+      {
         kind: 'horizontalRule',
         label: 'Horizontal Rule',
         icon: 'i-lucide-separator-horizontal',
@@ -75,6 +80,6 @@ export function useEditorSuggestions<T extends EditorCustomHandlers>(_customHand
   ] satisfies EditorSuggestionMenuItem<T>[][]
 
   return {
-    items,
+    suggestionItems,
   }
 }

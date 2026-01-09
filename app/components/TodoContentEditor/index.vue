@@ -3,8 +3,10 @@ import type { EditorCustomHandlers } from '@nuxt/ui'
 import type { Editor } from '@tiptap/core'
 import { openPath, openUrl } from '@tauri-apps/plugin-opener'
 import { TaskItem, TaskList } from '@tiptap/extension-list'
+import { TableKit } from '@tiptap/extension-table'
 import TextAlign from '@tiptap/extension-text-align'
 import { debounce } from 'lodash-es'
+import { CellSelection } from 'prosemirror-tables'
 import { CodeBlockShiki } from 'tiptap-extension-code-block-shiki'
 import { useTodoStore } from '~/store/todo'
 import { getLocalFilePath, isNetworkUrl } from '~/utils/path'
@@ -26,6 +28,12 @@ const customHandlers = {
     isActive: (editor: Editor) => editor.isActive('imageUpload'),
     isDisabled: undefined,
   },
+  table: {
+    canExecute: (editor: Editor) => editor.can().insertTable({ rows: 3, cols: 3, withHeaderRow: true }),
+    execute: (editor: Editor) => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }),
+    isActive: (editor: Editor) => editor.isActive('table'),
+    isDisabled: undefined,
+  },
   file: {
     canExecute: (_editor: Editor) => true,
     execute: (editor: Editor) => {
@@ -39,8 +47,8 @@ const customHandlers = {
   },
 } satisfies EditorCustomHandlers
 
-const { items: suggestionItems } = useEditorSuggestions(customHandlers)
-const { bubbleToolbarItems, getImageToolbarItems } = useEditorToolbar(customHandlers)
+const { suggestionItems } = useEditorSuggestions(customHandlers)
+const { bubbleToolbarItems, getImageToolbarItems, getTableToolbarItems } = useEditorToolbar(customHandlers)
 
 const content = computed({
   get: () => todoStore.activeTodo?.content || null,
@@ -55,6 +63,7 @@ const extensions = computed(() => [
   CustomImage,
   CustomFile,
   ImageUpload,
+  TableKit,
   CodeBlockShiki.configure({
     defaultTheme: 'material-theme',
     themes: {
@@ -147,6 +156,14 @@ defineExpose({ focus: () => editorRef.value?.editor?.commands.focus('end') })
       :ui="{
         base: [
           'p-2! pb-8! [&_p]:leading-5',
+          // Tables
+          '[&_table]:w-full [&_table]:border-separate [&_table]:border-spacing-0 [&_table]:rounded-md',
+          '[&_th]:py-3 [&_th]:px-4 [&_th]:font-semibold [&_th]:text-sm [&_th]:text-left [&_th]:bg-muted/50 [&_th]:border-t [&_th]:border-b [&_th]:border-e [&_th]:first:border-s [&_th]:border-muted',
+          '[&_th_p]:my-0 [&_th_p]:leading-5',
+          '[&_td]:py-3 [&_td]:px-4 [&_td]:text-sm [&_td]:text-left [&_td]:border-b [&_td]:border-e [&_td]:first:border-s [&_td]:border-muted',
+          '[&_td_p]:my-0 [&_td_p]:leading-5 [&_td_code]:text-xs/5 [&_td_ul]:my-0 [&_td_ol]:my-0 [&_td_ul]:ps-4.5 [&_td_ol]:ps-4.5 [&_td_li]:leading-6 [&_td_li]:my-0.5',
+          '[&_tr:first-child_th:first-child]:rounded-tl-md [&_tr:first-child_th:last-child]:rounded-tr-md [&_tr:last-child_td:first-child]:rounded-bl-md [&_tr:last-child_td:last-child]:rounded-br-md',
+          '[&_.selectedCell]:bg-primary/10 [&_.selectedCell]:ring-2 [&_.selectedCell]:ring-primary [&_.selectedCell]:ring-inset',
           // Task lists
           '[&_ul[data-type=taskList]]:list-none [&_ul[data-type=taskList]]:ps-1',
           '[&_ul[data-type=taskList]_li]:flex [&_ul[data-type=taskList]_li]:items-start [&_ul[data-type=taskList]_li]:ps-0',
@@ -168,7 +185,12 @@ defineExpose({ focus: () => editorRef.value?.editor?.commands.focus('end') })
         :items="bubbleToolbarItems"
         layout="bubble"
         :should-show="({ editor, view, state }: any) => {
-          if (editor.isActive('imageUpload') || editor.isActive('image') || editor.isActive('file')) {
+          if (
+            editor.isActive('imageUpload')
+            || editor.isActive('image')
+            || editor.isActive('file')
+            || state.selection instanceof CellSelection
+          ) {
             return false
           }
           const { selection } = state
@@ -179,6 +201,15 @@ defineExpose({ focus: () => editorRef.value?.editor?.commands.focus('end') })
           <LinkPopover :editor="editor" />
         </template>
       </UEditorToolbar>
+
+      <UEditorToolbar
+        :editor="editor"
+        :items="getTableToolbarItems(editor)"
+        layout="bubble"
+        :should-show="({ editor, view }: any) => {
+          return editor.state.selection instanceof CellSelection && view.hasFocus()
+        }"
+      />
 
       <UEditorToolbar
         :editor="editor"
