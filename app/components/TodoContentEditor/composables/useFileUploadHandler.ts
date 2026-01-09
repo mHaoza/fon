@@ -1,134 +1,164 @@
 import type { Editor } from '@tiptap/core'
 import { selectFiles } from '~/utils/upload'
 
-interface UploadConfig {
-  nodeType: 'file' | 'image'
-  accept?: string
-  insertAttrs: (fileName: string) => Record<string, any>
-  updateAttrs: (result: any) => Record<string, any>
-  shouldUpdate: (node: any) => boolean
-  errorMessage: string
-}
+/** 找到并更新最后一个加载中的文件节点 */
+function updateLastFileNode(editor: Editor, attrs?: Record<string, any>) {
+  let lastPos = -1
+  editor.state.doc.descendants((node, pos) => {
+    if (node.type.name === 'file' && node.attrs.loading) {
+      lastPos = pos
+    }
+  })
 
-/** 通用的上传处理函数 */
-async function handleUpload(editor: Editor, todoId: number, config: UploadConfig) {
-  // 打开文件选择对话框
-  const selectedFiles = await selectFiles(config.accept ? { accept: config.accept } : undefined)
-  if (!selectedFiles || !selectedFiles[0]) {
+  if (lastPos === -1) {
     return
   }
 
-  const file = selectedFiles[0]
+  if (attrs) {
+    editor.chain().updateAttributes('file', attrs).run()
+  }
+  else {
+    editor.chain().deleteRange({ from: lastPos, to: lastPos + 1 }).run()
+  }
+}
 
+/** 找到并更新最后一个没有 src 的图片节点 */
+function updateLastImageNode(editor: Editor, attrs?: Record<string, any>) {
+  let lastPos = -1
+  let lastNode: any = null
+
+  editor.state.doc.descendants((node, pos) => {
+    if (node.type.name === 'image' && !node.attrs.src) {
+      lastPos = pos
+      lastNode = node
+    }
+  })
+
+  if (lastPos === -1 || !lastNode) {
+    return
+  }
+
+  const tr = editor.state.tr
+  if (attrs) {
+    tr.setNodeMarkup(lastPos, undefined, { ...lastNode.attrs, ...attrs })
+  }
+  else {
+    tr.delete(lastPos, lastPos + 1)
+  }
+  editor.view.dispatch(tr)
+}
+
+/** 上传文件 */
+async function uploadFileNode(editor: Editor, todoId: number, file: File) {
   try {
-    // 插入带 loading 状态的节点
-    editor
-      .chain()
-      .focus()
-      .insertContent({
-        type: config.nodeType,
-        attrs: config.insertAttrs(file.name),
-      })
-      .run()
+    // 插入加载中的文件节点
+    editor.chain().focus().insertContent({
+      type: 'file',
+      attrs: { path: '', name: file.name, loading: true },
+    }).run()
 
     // 上传文件
     const result = await uploadFile({ path: `todos/${todoId}`, file })
 
-    // 上传完成后，更新最后一个节点
-    const { state } = editor
-    const { doc } = state
-
-    // 从后往前遍历，找到最后一个需要更新的节点
-    let lastNodePos = -1
-    let lastNode: any = null
-    doc.descendants((node, pos) => {
-      if (node.type.name === config.nodeType && config.shouldUpdate(node)) {
-        lastNodePos = pos
-        lastNode = node
-      }
+    // 更新节点
+    updateLastFileNode(editor, {
+      path: result.path,
+      name: file.name,
+      loading: false,
     })
-
-    // 如果找到了节点，更新它
-    if (lastNodePos >= 0) {
-      if (config.nodeType === 'file') {
-        editor
-          .chain()
-          .updateAttributes('file', config.updateAttrs({ name: file.name, path: result.path }))
-          .run()
-      }
-      else if (lastNode) {
-        const tr = editor.state.tr
-        tr.setNodeMarkup(lastNodePos, undefined, {
-          ...lastNode.attrs,
-          ...config.updateAttrs({ name: file.name, path: result.path }),
-        })
-        editor.view.dispatch(tr)
-      }
-    }
   }
   catch (error) {
-    console.error(config.errorMessage, error)
-    // 如果上传失败，需要移除加载中的节点
-    const { state } = editor
-    const { doc } = state
+    console.error('文件上传失败:', error)
+    updateLastFileNode(editor) // 删除失败的节点
+  }
+}
 
-    let lastNodePos = -1
-    doc.descendants((node, pos) => {
-      if (node.type.name === config.nodeType && config.shouldUpdate(node)) {
-        lastNodePos = pos
-      }
+/** 上传图片 */
+async function uploadImageNode(editor: Editor, todoId: number, file: File) {
+  try {
+    // 插入加载中的图片节点
+    editor.chain().focus().insertContent({
+      type: 'image',
+      attrs: { src: '', alt: file.name, loading: true },
+    }).run()
+
+    // 上传图片
+    const result = await uploadFile({ path: `todos/${todoId}`, file })
+
+    // 更新节点
+    updateLastImageNode(editor, {
+      src: result.path,
+      alt: file.name,
     })
-
-    if (lastNodePos >= 0) {
-      if (config.nodeType === 'file') {
-        editor
-          .chain()
-          .deleteRange({ from: lastNodePos, to: lastNodePos + 1 })
-          .run()
-      }
-      else {
-        const tr = editor.state.tr
-        tr.delete(lastNodePos, lastNodePos + 1)
-        editor.view.dispatch(tr)
-      }
-    }
+  }
+  catch (error) {
+    console.error('图片上传失败:', error)
+    updateLastImageNode(editor) // 删除失败的节点
   }
 }
 
 /** 处理文件上传 */
 export async function handleFileUpload(editor: Editor, todoId: number) {
-  await handleUpload(editor, todoId, {
-    nodeType: 'file',
-    insertAttrs: fileName => ({
-      path: '',
-      name: fileName,
-      loading: true,
-    }),
-    updateAttrs: result => ({
-      path: result.path,
-      name: result.name,
-      loading: false,
-    }),
-    shouldUpdate: node => node.attrs.loading,
-    errorMessage: '处理文件失败:',
-  })
+  const files = await selectFiles()
+  if (files?.[0]) {
+    await uploadFileNode(editor, todoId, files[0])
+  }
 }
 
 /** 处理图片上传 */
 export async function handleImageUpload(editor: Editor, todoId: number) {
-  await handleUpload(editor, todoId, {
-    nodeType: 'image',
-    accept: 'image/*',
-    insertAttrs: fileName => ({
-      src: '',
-      alt: fileName,
-      loading: true,
-    }),
-    updateAttrs: result => ({
-      src: result.path,
-      alt: result.name,
-    }),
-    shouldUpdate: node => !node.attrs.src,
-    errorMessage: '处理图片失败:',
-  })
+  const files = await selectFiles({ accept: 'image/*' })
+  if (files?.[0]) {
+    await uploadImageNode(editor, todoId, files[0])
+  }
+}
+
+/** 处理拖拽上传 */
+export async function handleDropUpload(editor: Editor, todoId: number, event: DragEvent) {
+  const file = event.dataTransfer?.files?.[0]
+  if (!file) {
+    return
+  }
+
+  event.preventDefault()
+  event.stopPropagation()
+
+  if (file.type.startsWith('image/')) {
+    await uploadImageNode(editor, todoId, file)
+  }
+  else {
+    await uploadFileNode(editor, todoId, file)
+  }
+}
+
+/** 处理粘贴上传 */
+export async function handlePasteUpload(editor: Editor, todoId: number, event: ClipboardEvent) {
+  const items = event.clipboardData?.items
+  if (!items) {
+    return
+  }
+
+  let file: File | null = null
+  for (const item of Array.from(items)) {
+    if (item.kind === 'file') {
+      file = item.getAsFile()
+      if (file) {
+        break
+      }
+    }
+  }
+
+  if (!file) {
+    return
+  }
+
+  event.preventDefault()
+  event.stopPropagation()
+
+  if (file.type.startsWith('image/')) {
+    await uploadImageNode(editor, todoId, file)
+  }
+  else {
+    await uploadFileNode(editor, todoId, file)
+  }
 }

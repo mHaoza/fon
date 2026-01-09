@@ -81,6 +81,7 @@ pub fn create_main_window() {
         .transparent(true) // 透明
         .visible(false)
         .shadow(true)
+        .disable_drag_drop_handler() // 禁用tauri拖拽，启用浏览器自带的拖拽功能
         .build()
         .unwrap();
 

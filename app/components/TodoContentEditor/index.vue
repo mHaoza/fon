@@ -10,7 +10,7 @@ import { CodeBlockShiki } from 'tiptap-extension-code-block-shiki'
 import { useTodoStore } from '~/store/todo'
 import { useEditorSuggestions } from './composables/useEditorSuggestions'
 import { useEditorToolbar } from './composables/useEditorToolbar'
-import { handleFileUpload, handleImageUpload } from './composables/useFileUploadHandler'
+import { handleDropUpload, handleFileUpload, handleImageUpload, handlePasteUpload } from './composables/useFileUploadHandler'
 import CustomFile from './CustomFile'
 import CustomImage from './CustomImage'
 import LinkPopover from './LinkPopover.vue'
@@ -118,6 +118,18 @@ onBeforeUnmount(() => {
   }
 })
 
+async function handleDrop(event: DragEvent) {
+  if (todoStore.activeTodo?.id && editorRef.value?.editor) {
+    handleDropUpload(editorRef.value.editor, todoStore.activeTodo.id, event)
+  }
+}
+
+async function handlePaste(event: ClipboardEvent) {
+  if (todoStore.activeTodo?.id && editorRef.value?.editor) {
+    handlePasteUpload(editorRef.value.editor, todoStore.activeTodo.id, event)
+  }
+}
+
 defineExpose({ focus: () => editorRef.value?.editor?.commands.focus('end') })
 </script>
 
@@ -137,7 +149,7 @@ defineExpose({ focus: () => editorRef.value?.editor?.commands.focus('end') })
       placeholder="输入内容或使用 / 快速插入..."
       :ui="{
         base: [
-          'p-2! pb-8! [&_p]:leading-5',
+          ' pb-8! [&_p]:leading-5',
           // Tables
           '[&_table]:w-full [&_table]:border-separate [&_table]:border-spacing-0 [&_table]:rounded-md',
           '[&_th]:py-3 [&_th]:px-4 [&_th]:font-semibold [&_th]:text-sm [&_th]:text-left [&_th]:bg-muted/50 [&_th]:border-t [&_th]:border-b [&_th]:border-e [&_th]:first:border-s [&_th]:border-muted',
@@ -159,6 +171,8 @@ defineExpose({ focus: () => editorRef.value?.editor?.commands.focus('end') })
           'mx-auto',
         ],
       }"
+      @drop="handleDrop"
+      @paste="handlePaste"
       @update:model-value="onUpdate"
       @blur="updateTodo.flush()"
     >
@@ -203,7 +217,7 @@ defineExpose({ focus: () => editorRef.value?.editor?.commands.focus('end') })
       <UEditorSuggestionMenu
         :editor="editor"
         :items="suggestionItems"
-      />
+      /><UEditorDragHandle :editor="editor" />
     </UEditor>
   </div>
 </template>
