@@ -2,7 +2,6 @@
 import type { NodeViewProps } from '@tiptap/vue-3'
 import { NodeViewWrapper } from '@tiptap/vue-3'
 import { useTodoStore } from '~/store/todo'
-import { uploadFile } from '~/utils/file'
 import { generateFilenameWithConflictResolution } from '~/utils/path'
 
 const props = defineProps<NodeViewProps>()

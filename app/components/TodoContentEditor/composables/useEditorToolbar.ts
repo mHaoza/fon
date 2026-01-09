@@ -29,46 +29,51 @@ export function useEditorToolbar<T extends EditorCustomHandlers>(_customHandlers
           {
             kind: 'heading',
             level: 1,
-            icon: 'i-lucide-heading-1',
             label: 'Heading 1',
+            icon: 'i-lucide-heading-1',
           },
           {
             kind: 'heading',
             level: 2,
-            icon: 'i-lucide-heading-2',
             label: 'Heading 2',
+            icon: 'i-lucide-heading-2',
           },
           {
             kind: 'heading',
             level: 3,
-            icon: 'i-lucide-heading-3',
             label: 'Heading 3',
+            icon: 'i-lucide-heading-3',
           },
           {
             kind: 'heading',
             level: 4,
-            icon: 'i-lucide-heading-4',
             label: 'Heading 4',
+            icon: 'i-lucide-heading-4',
           },
           {
             kind: 'bulletList',
-            icon: 'i-lucide-list',
             label: 'Bullet List',
+            icon: 'i-lucide-list',
           },
           {
             kind: 'orderedList',
-            icon: 'i-lucide-list-ordered',
             label: 'Ordered List',
+            icon: 'i-lucide-list-ordered',
+          },
+          {
+            kind: 'taskList',
+            label: 'Task List',
+            icon: 'i-lucide-list-check',
           },
           {
             kind: 'blockquote',
-            icon: 'i-lucide-text-quote',
             label: 'Blockquote',
+            icon: 'i-lucide-text-quote',
           },
           {
             kind: 'codeBlock',
-            icon: 'i-lucide-square-code',
             label: 'Code Block',
+            icon: 'i-lucide-square-code',
           },
         ],
       },
@@ -114,41 +119,6 @@ export function useEditorToolbar<T extends EditorCustomHandlers>(_customHandlers
         kind: 'imageUpload',
         icon: 'i-lucide-image',
         tooltip: { text: 'Image' },
-      },
-    ],
-    [
-      {
-        icon: 'i-lucide-align-justify',
-        tooltip: { text: 'Text Align' },
-        content: {
-          align: 'end',
-        },
-        items: [
-          {
-            kind: 'textAlign',
-            align: 'left',
-            icon: 'i-lucide-align-left',
-            label: 'Align Left',
-          },
-          {
-            kind: 'textAlign',
-            align: 'center',
-            icon: 'i-lucide-align-center',
-            label: 'Align Center',
-          },
-          {
-            kind: 'textAlign',
-            align: 'right',
-            icon: 'i-lucide-align-right',
-            label: 'Align Right',
-          },
-          {
-            kind: 'textAlign',
-            align: 'justify',
-            icon: 'i-lucide-align-justify',
-            label: 'Align Justify',
-          },
-        ],
       },
     ],
   ] satisfies EditorToolbarItem<T>[][])

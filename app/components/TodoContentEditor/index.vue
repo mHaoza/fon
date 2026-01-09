@@ -51,22 +51,6 @@ const content = computed({
   },
 })
 
-const taskListStyle = [
-  // Task list 基础样式
-  '**:data-[type=taskList]:list-none **:data-[type=taskList]:ml-0 **:data-[type=taskList]:p-0 **:data-[type=taskList]:m-0',
-  // Task list item 样式
-  '[&_[data-type=taskList]_li]:flex [&_[data-type=taskList]_li]:items-start [&_[data-type=taskList]_li]:break-all',
-  // Task list item 内容区域
-  '[&_[data-type=taskList]_li>div]:flex-auto',
-  // Task list label 样式
-  '[&_[data-type=taskList]_li>label]:flex-none [&_[data-type=taskList]_li>label]:mr-2 [&_[data-type=taskList]_li>label]:select-none',
-  // Task list checkbox 样式
-  '[&_[data-type=taskList]_input[type=checkbox]]:cursor-pointer',
-  // 已完成任务样式（灰色 + 删除线）
-  '[&_[data-type=taskList]_li:has(input[type=checkbox]:checked)>div]:text-gray-500 [&_[data-type=taskList]_li:has(input[type=checkbox]:checked)>div]:line-through',
-  '[&_[data-type=taskList]_li:has(input[type=checkbox]:checked)>div]:dark:text-gray-400',
-]
-
 const extensions = computed(() => [
   CustomImage,
   CustomFile,
@@ -163,7 +147,13 @@ defineExpose({ focus: () => editorRef.value?.editor?.commands.focus('end') })
       :ui="{
         base: [
           'p-2! pb-8! [&_p]:leading-5',
-          ...taskListStyle,
+          // Task lists
+          '[&_ul[data-type=taskList]]:list-none [&_ul[data-type=taskList]]:ps-1',
+          '[&_ul[data-type=taskList]_li]:flex [&_ul[data-type=taskList]_li]:items-start [&_ul[data-type=taskList]_li]:ps-0',
+          '[&_ul[data-type=taskList]_li_label]:inline-flex [&_ul[data-type=taskList]_li_label]:relative [&_ul[data-type=taskList]_li_label]:pr-2.5',
+          '[&_ul[data-type=taskList]_li_label_input]:appearance-none [&_ul[data-type=taskList]_li_label_input]:size-4 [&_ul[data-type=taskList]_li_label_input]:my-0.5 [&_ul[data-type=taskList]_li_label_input]:rounded-sm [&_ul[data-type=taskList]_li_label_input]:ring [&_ul[data-type=taskList]_li_label_input]:ring-inset [&_ul[data-type=taskList]_li_label_input]:ring-accented [&_ul[data-type=taskList]_li_label_input]:bg-center',
+          '[&_ul[data-type=taskList]_li_label_input:checked]:bg-primary [&_ul[data-type=taskList]_li_label_input:checked]:ring-primary [&_ul[data-type=taskList]_li_label_input:checked]:bg-[url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTIwIDZMOSAxN2wtNS01Ii8+PC9zdmc+)] dark:[&_ul[data-type=taskList]_li_label_input:checked]:bg-[url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTIwIDZMOSAxN2wtNS01Ii8+PC9zdmc+)]',
+          '[&_ul[data-type=taskList]_li[data-checked=true]>div>p]:line-through [&_ul[data-type=taskList]_li[data-checked=true]>div>p]:opacity-50',
         ],
         content: [
           'max-w-4xl',

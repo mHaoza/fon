@@ -14,7 +14,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@nuxt/ui": "https://pkg.pr.new/@nuxt/ui@1a3a82f",
+    "@nuxt/ui": "https://pkg.pr.new/@nuxt/ui@db04197",
     "@pinia/nuxt": "0.11.2",
     "@tailwindcss/vite": "^4.1.18",
     "@tauri-apps/api": "^2.9.1",
