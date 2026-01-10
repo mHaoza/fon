@@ -1,0 +1,109 @@
+# 默认能力（TOML）
+# 目标：使用 TOML 提供更友好的注释与分类
+# 说明：Tauri v2 支持 TOML 能力清单；本文件将替代 JSON
+
+identifier = "default-capability"        # 能力唯一标识
+description = "Default capability"        # 能力描述
+windows = ["main"]                        # 能力生效的窗口列表
+
+# -----------------------------
+# 窗口相关 (core:window)
+# -----------------------------
+[[permissions]]
+identifier = "core:window:allow-start-dragging" # 允许窗口拖拽
+[[permissions]]
+identifier = "core:window:allow-minimize"       # 最小化
+[[permissions]]
+identifier = "core:window:allow-unminimize"     # 取消最小化
+[[permissions]]
+identifier = "core:window:allow-toggle-maximize"# 切换最大化
+[[permissions]]
+identifier = "core:window:allow-internal-toggle-maximize" # 内部最大化切换
+[[permissions]]
+identifier = "core:window:allow-is-maximized"    # 查询是否最大化
+[[permissions]]
+identifier = "core:window:allow-set-always-on-top" # 置顶
+[[permissions]]
+identifier = "core:window:allow-close"           # 关闭窗口
+[[permissions]]
+identifier = "core:window:allow-hide"            # 隐藏窗口
+
+# -----------------------------
+# 事件相关 (core:event)
+# -----------------------------
+[[permissions]]
+identifier = "core:event:allow-listen"           # 允许监听事件
+[[permissions]]
+identifier = "core:event:allow-unlisten"         # 允许取消监听
+[[permissions]]
+identifier = "core:event:default"                # 事件默认能力
+
+# -----------------------------
+# 路径相关 (core:path)
+# -----------------------------
+[[permissions]]
+identifier = "core:path:allow-resolve-directory" # 允许解析目录
+[[permissions]]
+identifier = "core:path:default"                 # 路径默认能力
+
+# -----------------------------
+# 文件系统相关 (fs)
+# -----------------------------
+[[permissions]]
+identifier = "fs:default"                         # 文件系统默认能力
+[[permissions]]
+identifier = "fs:allow-exists"                    # 判断存在
+[[permissions]]
+identifier = "fs:allow-read"                      # 读取文件
+[[permissions]]
+identifier = "fs:allow-write"                     # 写入文件
+[[permissions]]
+identifier = "fs:allow-read-dir"                  # 读取目录
+[[permissions]]
+identifier = "fs:allow-mkdir"                     # 创建目录
+[[permissions]]
+identifier = "fs:allow-remove"                    # 删除
+[[permissions]]
+identifier = "fs:allow-stat"                      # 文件属性
+[[permissions]]
+identifier = "fs:scope-resource-recursive"        # 资源目录递归范围
+[[permissions]]
+identifier = "fs:allow-resource-write-recursive"  # 允许资源目录递归写入
+[[permissions]]
+identifier = "fs:scope-applocaldata-recursive"    # 应用本地数据递归范围
+[[permissions]]
+identifier = "fs:allow-applocaldata-write-recursive" # 应用本地数据递归写入
+
+# -----------------------------
+# 全局快捷键 (global-shortcut)
+# -----------------------------
+[[permissions]]
+identifier = "global-shortcut:default"
+
+# -----------------------------
+# 数据库 (sql)
+# -----------------------------
+[[permissions]]
+identifier = "sql:default"                        # 数据库默认能力
+[[permissions]]
+identifier = "sql:allow-load"                     # 加载数据库
+[[permissions]]
+identifier = "sql:allow-execute"                  # 执行语句
+[[permissions]]
+identifier = "sql:allow-select"                   # 查询
+
+# -----------------------------
+# 外部打开 (opener)
+# -----------------------------
+[[permissions]]
+identifier = "opener:default"                     # 外部打开默认能力
+
+# 规则：允许打开任意路径
+[[permissions]]
+identifier = "opener:allow-open-path"
+allow = [{ path = "/**" }]
+
+# 规则：允许打开任意 URL
+[[permissions]]
+identifier = "opener:allow-open-url"
+allow = [{ url = "**" }]
