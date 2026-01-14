@@ -1,2 +1,17 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+
+
+*::-webkit-scrollbar {
+  width: 6px;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+}
+
+*:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(205, 209, 215, 0.5);
+}
+  
