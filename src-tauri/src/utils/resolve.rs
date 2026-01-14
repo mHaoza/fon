@@ -9,15 +9,29 @@ pub async fn resolve_setup(app: &mut App) {
     handle::Handle::global().init(app.app_handle());
 
     create_main_window();
+    register_shortcuts();
+}
 
+/** 注册全局快捷键 */
+fn register_shortcuts() {
     let app_handle = handle::Handle::global().app_handle().unwrap();
+    
+    // Alt+Shift+O 切换显示/隐藏主窗口
     let _ = app_handle.global_shortcut().on_shortcut(
         "alt+shift+o",
         move |_app_handle, hotkey, event| {
-            if event.state == ShortcutState::Pressed {
-                if hotkey.key == Code::KeyO {
-                    toggle_main_window();
-                }
+            if event.state == ShortcutState::Pressed && hotkey.key == Code::KeyO {
+                toggle_main_window();
+            }
+        },
+    );
+
+    // ESC 隐藏主窗口（仅当窗口聚焦时）
+    let _ = app_handle.global_shortcut().on_shortcut(
+        "Escape",
+        move |_app_handle, hotkey, event| {
+            if event.state == ShortcutState::Pressed && hotkey.key == Code::Escape {
+                hide_main_window_if_focused();
             }
         },
     );
@@ -34,6 +48,17 @@ pub fn toggle_main_window() {
     }
 
     create_main_window();
+}
+
+/** 如果主窗口聚焦则隐藏 */
+pub fn hide_main_window_if_focused() {
+    let app_handle = handle::Handle::global().app_handle().unwrap();
+    
+    if let Some(window) = app_handle.get_webview_window("main") {
+        if window.is_focused().unwrap_or(false) {
+            let _ = window.hide();
+        }
+    }
 }
 
 /** 创建主窗口 */
