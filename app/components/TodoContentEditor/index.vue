@@ -98,9 +98,9 @@ const editorContainerRef = ref<HTMLElement>()
 
 // 处理点击链接事件
 async function handleLinkClick(event: MouseEvent) {
-  event.preventDefault()
   const href = (event.target as HTMLElement)?.closest('a')?.getAttribute('href')
   if (href) {
+    event.preventDefault()
     await openUrl(`//${href}`)
   }
 }
