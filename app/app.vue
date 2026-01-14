@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { initAllDatabases } from '~/db'
+
+const appWindow = getCurrentWebviewWindow()
 
 // 初始化数据库
 onMounted(async () => {
@@ -22,6 +25,12 @@ onUnmounted(() => {
 })
 
 function handleKeydown(e: KeyboardEvent) {
+  // ESC 键隐藏窗口
+  if (e.key === 'Escape') {
+    appWindow.hide()
+    return
+  }
+
   // Disable WebView keyboard shortcuts
   const disabledShortcuts
     = ['F5', 'F7'].includes(e.key)

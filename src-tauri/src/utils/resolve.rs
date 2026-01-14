@@ -26,15 +26,7 @@ fn register_shortcuts() {
         },
     );
 
-    // ESC 隐藏主窗口（仅当窗口聚焦时）
-    let _ = app_handle.global_shortcut().on_shortcut(
-        "Escape",
-        move |_app_handle, hotkey, event| {
-            if event.state == ShortcutState::Pressed && hotkey.key == Code::Escape {
-                hide_main_window_if_focused();
-            }
-        },
-    );
+    // ESC 键在前端监听，不使用全局快捷键以避免影响其他应用
 }
 
 pub fn toggle_main_window() {
