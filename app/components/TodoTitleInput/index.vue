@@ -67,9 +67,14 @@ function focus() {
   editorRef.value?.editor?.chain().focus().run()
 }
 
+function setContent(newContent: string) {
+  editorRef.value?.editor?.commands.setContent(newContent || '')
+}
+
 defineExpose({
   isFocused,
   focus,
+  setContent,
   getTags: () => {
     const editor = editorRef.value?.editor
     if (!editor) {
@@ -110,6 +115,7 @@ defineExpose({
       ],
     }"
     :editable="props.editable"
+    autofocus
     class="w-full max-h-21 overflow-auto"
     @focus="() => {
       isFocused = true

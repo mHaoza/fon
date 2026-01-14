@@ -5,6 +5,7 @@ import { useTagStore } from './tag'
 
 export const useTodoStore = defineStore('todo', () => {
   const route = useRoute()
+  const router = useRouter()
   const tagStore = useTagStore()
 
   /** 待办事项列表 */
@@ -14,10 +15,23 @@ export const useTodoStore = defineStore('todo', () => {
     deleted: useTodoList(todosDb.getDeletedTodoList, {}),
   })
 
-  const activeTodoId = computed(() => {
-    return route.query.todo ? Number(route.query.todo) : null
+  const activeTodoId = computed({
+    get() {
+      return route.query.todo ? Number(route.query.todo) : null
+    },
+    set(value: number | null) {
+      router.push({
+        path: route.path,
+        hash: route.hash,
+        query: {
+          ...route.query,
+          todo: value?.toString() || '',
+        },
+      })
+    },
   })
   const activeTodo = ref<Todo | null>(null)
+
   watch(
     activeTodoId,
     async (id) => {
@@ -37,6 +51,7 @@ export const useTodoStore = defineStore('todo', () => {
       const result = await todosDb.addTodo(todo)
       updateTodoList('add', result)
       tagStore.refreshTagList()
+      return result
     }
     catch (error) {
       console.error('添加待办事项失败:', error)

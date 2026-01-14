@@ -13,7 +13,6 @@ const route = useRoute()
 const todoStore = useTodoStore()
 const todoInput = useTemplateRef('todoInput')
 const todo = ref<TodoCreate>(getDefaultTodoData())
-const editorKey = ref(0)
 
 function getDefaultTodoData(): TodoCreate {
   return {
@@ -50,10 +49,12 @@ async function addTodo() {
       title: todo.value.title,
       tags: [...new Set([...todo.value.tags, ...tags, ...viewTags])],
     }
+    const addTodo = await todoStore.addTodo(todoData)
+    todoStore.activeTodoId = addTodo.id
 
-    await todoStore.addTodo(todoData)
+    // 重置输入框
     todo.value = getDefaultTodoData()
-    editorKey.value++ // 强制重新挂载编辑器
+    todoInput.value?.setContent(todo.value.title)
   }
   catch (error) {
     console.error('Failed to add todo:', error)
@@ -63,7 +64,6 @@ async function addTodo() {
 // 窗口显示时自动获取焦点
 let unlisten: () => void
 onMounted(async () => {
-  // todoInput.value?.focus()
   const webviewWindow = getCurrentWebviewWindow()
   unlisten = await webviewWindow.listen('show', () => {
     todoInput.value?.focus()
@@ -84,7 +84,6 @@ onUnmounted(() => {
     }"
   >
     <TodoTitleInput
-      :key="editorKey"
       ref="todoInput"
       v-model:value="todo.title"
       :placeholder="props.placeholder"

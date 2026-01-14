@@ -37,16 +37,8 @@ async function updateTodoTitle(todo: Todo) {
   focusedTodo.value = null
 }
 
-const router = useRouter()
 function setActiveTodo(todoId?: number | null) {
-  router.push({
-    path: router.currentRoute.value.path,
-    hash: router.currentRoute.value.hash,
-    query: {
-      ...router.currentRoute.value.query,
-      todo: todoId?.toString() || '',
-    },
-  })
+  todoStore.activeTodoId = todoId || null
 }
 
 function getContextMenuItems(todo: Todo) {
