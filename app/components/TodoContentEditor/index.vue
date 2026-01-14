@@ -10,20 +10,26 @@ import { CodeBlockShiki } from 'tiptap-extension-code-block-shiki'
 import { useTodoStore } from '~/store/todo'
 import { useEditorSuggestions } from './composables/useEditorSuggestions'
 import { useEditorToolbar } from './composables/useEditorToolbar'
-import { handleFileUpload } from './composables/useFileUploadHandler'
+import { handleFileUpload, handleImageUpload } from './composables/useFileUploadHandler'
 import CustomFile from './CustomFile'
 import CustomImage from './CustomImage'
-import ImageUpload from './ImageUpload'
 import LinkPopover from './LinkPopover.vue'
 
 const todoStore = useTodoStore()
 
 // Custom handlers for editor
 const customHandlers = {
-  imageUpload: {
-    canExecute: (editor: Editor) => editor.can().insertContent({ type: 'imageUpload' }),
-    execute: (editor: Editor) => editor.chain().focus().insertContent({ type: 'imageUpload' }),
-    isActive: (editor: Editor) => editor.isActive('imageUpload'),
+  image: {
+    canExecute: (_editor: Editor) => true,
+    execute: (editor: Editor) => {
+      const todoId = todoStore.activeTodo?.id
+      if (todoId) {
+        handleImageUpload(editor, todoId)
+      }
+      // 返回空函数以消除调用报错
+      return { run: () => {} }
+    },
+    isActive: (editor: Editor) => editor.isActive('image'),
     isDisabled: undefined,
   },
   table: {
@@ -39,6 +45,8 @@ const customHandlers = {
       if (todoId) {
         handleFileUpload(editor, todoId)
       }
+      // 返回空函数以消除调用报错
+      return { run: () => {} }
     },
     isActive: (editor: Editor) => editor.isActive('file'),
     isDisabled: undefined,
@@ -60,7 +68,6 @@ const content = computed({
 const extensions = computed(() => [
   CustomImage,
   CustomFile,
-  ImageUpload,
   TableKit,
   CodeBlockShiki.configure({
     defaultTheme: 'material-theme',
@@ -161,8 +168,7 @@ defineExpose({ focus: () => editorRef.value?.editor?.commands.focus('end') })
         layout="bubble"
         :should-show="({ editor, view, state }: any) => {
           if (
-            editor.isActive('imageUpload')
-            || editor.isActive('image')
+            editor.isActive('image')
             || editor.isActive('file')
             || state.selection instanceof CellSelection
           ) {

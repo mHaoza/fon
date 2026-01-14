@@ -1,5 +1,6 @@
 import type { EditorCustomHandlers, EditorToolbarItem } from '@nuxt/ui'
 import type { Editor } from '@tiptap/vue-3'
+import { revealItemInDir } from '@tauri-apps/plugin-opener'
 
 export function useEditorToolbar<T extends EditorCustomHandlers>(_customHandlers?: T) {
   const bubbleToolbarItems = computed(() => [
@@ -116,9 +117,14 @@ export function useEditorToolbar<T extends EditorCustomHandlers>(_customHandlers
         icon: 'i-lucide-link',
       },
       {
-        kind: 'imageUpload',
+        kind: 'image',
         icon: 'i-lucide-image',
         tooltip: { text: 'Image' },
+      },
+      {
+        kind: 'file',
+        icon: 'i-lucide-file',
+        tooltip: { text: 'File' },
       },
     ],
   ] satisfies EditorToolbarItem<T>[][])
@@ -129,31 +135,20 @@ export function useEditorToolbar<T extends EditorCustomHandlers>(_customHandlers
     return [
       [
         {
-          icon: 'i-lucide-download',
-          to: node?.attrs?.src,
-          download: true,
-          tooltip: { text: 'Download' },
-        },
-        {
-          icon: 'i-lucide-refresh-cw',
-          tooltip: { text: 'Replace' },
-          onClick: () => {
-            const { state } = editor
-            const { selection } = state
-
-            const pos = selection.from
-            const node = state.doc.nodeAt(pos)
-
-            if (node && node.type.name === 'image') {
-              editor.chain().focus().deleteRange({ from: pos, to: pos + node.nodeSize }).insertContentAt(pos, { type: 'imageUpload' }).run()
+          icon: 'i-lucide-folder-open',
+          onClick: async () => {
+            if (node?.type.name === 'image' && node.attrs?.src && isLocalPath(node.attrs.src)) {
+              const path = await getLocalFilePath(node.attrs.src)
+              revealItemInDir(path)
             }
           },
+          tooltip: { text: '在文件管理器中显示' },
         },
       ],
       [
         {
           icon: 'i-lucide-trash',
-          tooltip: { text: 'Delete' },
+          tooltip: { text: '删除' },
           onClick: () => {
             const { state } = editor
             const { selection } = state

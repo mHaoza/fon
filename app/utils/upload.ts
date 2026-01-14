@@ -1,53 +1,38 @@
 import { mkdir, writeFile } from '@tauri-apps/plugin-fs'
+import dayjs from 'dayjs'
+import { nanoid } from 'nanoid'
 import { useSettingStore } from '~/store/setting'
-import { generateFilenameWithConflictResolution } from './path'
 
 /** 上传文件（写入 $RESOURCE 目录） */
 export async function uploadFile(options: {
-  name: string
   path: string
   file: File
 }) {
   const settingStore = useSettingStore()
   const content = await fileToUint8Array(options.file)
+
+  const extension = getFileExtension(options.file.name)
+
+  const baseFileName = `${dayjs().format('YYYYMMDD_HHmmss')}_${nanoid(8)}`
+  const fileName = extension ? `${baseFileName}.${extension}` : baseFileName
+
   const relativePath = `${settingStore.RESOURCE_DIR}/${options.path}`.replace(/\\/g, '/').replace(/\/\//g, '/')
+  const fullPath = `${relativePath}/${fileName}`.replace(/\\/g, '/').replace(/\/\//g, '/')
 
   // 确保目录存在
-  const dir = relativePath.includes('/') ? relativePath.substring(0, relativePath.lastIndexOf('/')) : ''
-  if (dir) {
+  if (relativePath) {
     try {
-      await mkdir(dir, { baseDir: settingStore.BASE_DIR, recursive: true })
+      await mkdir(relativePath, { baseDir: settingStore.BASE_DIR, recursive: true })
     }
     catch {}
   }
 
-  await writeFile(relativePath, content, { baseDir: settingStore.BASE_DIR })
+  await writeFile(fullPath, content, { baseDir: settingStore.BASE_DIR })
 
   return {
-    name: options.name,
-    path: `/${relativePath}`,
+    name: fileName,
+    path: `/${fullPath}`,
   }
-}
-
-/** 上传文件到指定目录 */
-export async function uploadFiles(files: File[], options: { baseDir: string }) {
-  const fileArray = Array.isArray(files) ? files : [files]
-  const results: { name: string, path: string }[] = []
-
-  for (const file of fileArray) {
-    const filename = await generateFilenameWithConflictResolution(file.name, options.baseDir)
-
-    // 上传文件到本地
-    const result = await uploadFile({
-      name: file.name,
-      path: `${options.baseDir}/${filename}`,
-      file,
-    })
-
-    results.push(result)
-  }
-
-  return results
 }
 
 /** 打开文件选择对话框 */
@@ -125,21 +110,4 @@ export async function selectFiles(
       }, 300)
     }
   })
-}
-
-/** 打开文件选择对话框并上传文件 */
-export async function selectAndUploadFile(options: { accept?: string, multiple?: boolean, baseDir: string }) {
-  const selectedFiles = await selectFiles(options)
-
-  if (!selectedFiles) {
-    return null
-  }
-
-  try {
-    return await uploadFiles(selectedFiles, options)
-  }
-  catch (error) {
-    console.error('上传文件失败:', error)
-    return null
-  }
 }
