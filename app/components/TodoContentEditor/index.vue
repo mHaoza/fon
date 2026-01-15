@@ -101,7 +101,7 @@ async function handleLinkClick(event: MouseEvent) {
   const href = (event.target as HTMLElement)?.closest('a')?.getAttribute('href')
   if (href) {
     event.preventDefault()
-    await openUrl(`//${href}`)
+    await openUrl(href)
   }
 }
 
