@@ -11,7 +11,9 @@
     "web:build": "nuxt build",
     "web:generate": "nuxt generate",
     "web:preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "release-version": "node scripts/release-version.mjs",
+    "publish-version": "node scripts/publish-version.mjs"
   },
   "dependencies": {
     "@nuxt/ui": "https://pkg.pr.new/@nuxt/ui@db04197",
