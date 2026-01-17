@@ -2,6 +2,7 @@ import * as tagsDb from '~/db/tags'
 import { useTodoStore } from './todo'
 
 export const useTagStore = defineStore('tag', () => {
+  const route = useRoute()
   const todoStore = useTodoStore()
   const { data: tagList, refresh: refreshTagList } = useAsyncData('tagList', tagsDb.getTagList, {
     default: () => [],
@@ -13,8 +14,8 @@ export const useTagStore = defineStore('tag', () => {
       await tagsDb.deleteTag(tagId)
       refreshTagList()
       // 刷新所有待办列表，因为标签已从相关的 todo 中移除
-      todoStore.todos.undone.refresh()
-      todoStore.todos.done.refresh()
+      todoStore.todos.undone.refresh({ tags: [route.params.tagName as string] })
+      todoStore.todos.done.refresh({ tags: [route.params.tagName as string] })
     }
     catch (error) {
       console.error('删除标签失败:', error)

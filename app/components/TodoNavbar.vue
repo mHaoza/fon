@@ -1,11 +1,13 @@
 <script setup lang="tsx">
 import type { ContextMenuItem } from '@nuxt/ui'
 import { UIcon } from '#components'
+import { getTodoList } from '~/db/todos'
 import { useTagStore } from '~/store/tag'
 
 const router = useRouter()
 const route = useRoute()
 const tagStore = useTagStore()
+const dialog = useDialog()
 
 type TodoNavbarValue = 'all' | `tag/${string}` | 'deleted'
 
@@ -21,15 +23,37 @@ function getTagMenuItems(tagId: number, tagName: string) {
       icon: 'i-mdi-delete',
       color: 'error',
       onSelect: async () => {
-        await tagStore.deleteTag(tagId)
-        // 如果当前正在查看被删除的标签，跳转到"所有"视图
-        if (route.path === `/main/todo/tag/${tagName}`) {
-          go('all')
+        // 判断是否存在任务使用该标签
+        const hasTodos = await getTodoList({ tags: [tagName] })
+        if (hasTodos.total > 0) {
+          // 有关联的 todo，需要用户确认
+          dialog.confirm({
+            title: '确认删除标签',
+            description: `标签 "${tagName}" 正在被 ${hasTodos.total} 个待办使用，删除后这些待办的标签也会被移除。`,
+            confirmText: '确认删除',
+            cancelText: '取消',
+            confirmColor: 'error',
+            onConfirm: async () => {
+              await deleteTag(tagId, tagName)
+            },
+          })
+        }
+        else {
+          // 没有关联的 todo，直接删除
+          await deleteTag(tagId, tagName)
         }
       },
     },
   ]
   return items
+}
+
+async function deleteTag(tagId: number, tagName: string) {
+  await tagStore.deleteTag(tagId)
+  // 如果当前正在查看被删除的标签，跳转到"所有"视图
+  if (route.path === `/main/todo/tag/${tagName}`) {
+    go('all')
+  }
 }
 
 const TodoNavbarItem = defineComponent({
