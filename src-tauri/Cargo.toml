@@ -1,6 +1,6 @@
 [package]
 name = "fon"
-version = "0.0.5-beta.2"
+version = "0.0.5-beta.3"
 description = "A Todo App"
 authors = ["mHaoza"]
 edition = "2024"
