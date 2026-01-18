@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
-
 *::-webkit-scrollbar {
   width: 6px;
 }

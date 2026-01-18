@@ -1,3 +1,4 @@
+import { defineStore } from 'pinia'
 import * as tagsDb from '~/db/tags'
 import { useTodoStore } from './todo'
 

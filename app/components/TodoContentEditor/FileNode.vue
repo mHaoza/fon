@@ -91,7 +91,7 @@ async function handleClick() {
   <NodeViewWrapper class="my-0!">
     <div
       class="inline-flex items-center gap-2 text-secondary-400 cursor-pointer hover:underline transition-opacity"
-      :class="{ 'bg-primary/20': props.selected, 'opacity-60': loading }"
+      :class="{ 'bg-primary-50 dark:bg-primary-900/20': props.selected, 'opacity-60': loading }"
       :title="name"
       @click="handleClick"
     >

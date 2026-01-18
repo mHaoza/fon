@@ -20,12 +20,12 @@ function vnode() {
       {{
         ...slots,
         default: ({ open }: { open: boolean }) => (
-          <div class="group flex items-center text-gray-500 p-1 rounded-md h-7 w-full hover:bg-gray-100 select-none">
+          <div class="group flex items-center text-neutral-600 px-1 py-1.5 rounded-md h-7 w-full hover:bg-neutral-50 select-none transition-all cursor-pointer">
             <UIcon
               name="i-mdi-chevron-right"
-              class={`opacity-0 inline-block group-hover:opacity-100 ${open ? 'rotate-90' : ''}`}
+              class={`opacity-0 inline-block group-hover:opacity-100 transition-all duration-200 ${open ? 'rotate-90' : ''}`}
             />
-            <span class="text-xs">{ props.title }</span>
+            <span class="text-xs font-medium">{ props.title }</span>
             <div class="trigger-extra">
               {slots.triggerExtra?.()}
             </div>

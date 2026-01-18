@@ -64,7 +64,7 @@ watch(() => props.node.attrs.src, async (newSrc) => {
 <template>
   <NodeViewWrapper
     class="relative rounded-md"
-    :class="{ 'ring-2 ring-primary': selected }"
+    :class="{ 'ring-2 ring-primary-500': selected }"
   >
     <img
       v-if="!loading && !error && fullUrl"
@@ -75,10 +75,10 @@ watch(() => props.node.attrs.src, async (newSrc) => {
       @error="handleImageError"
       @dblclick="handleDoubleClick"
     >
-    <div v-else-if="loading" class="inline-flex items-center justify-center w-full min-h-32 bg-gray-100 dark:bg-gray-800 rounded-md">
-      <UIcon name="i-lucide-loader-circle" class="animate-spin text-gray-400 dark:text-gray-500" />
+    <div v-else-if="loading" class="inline-flex items-center justify-center w-full min-h-32 bg-neutral-100 dark:bg-neutral-800 rounded-md">
+      <UIcon name="i-lucide-loader-circle" class="animate-spin text-neutral-400 dark:text-neutral-500" />
     </div>
-    <div v-else-if="error" class="inline-flex flex-col items-center justify-center gap-2 w-full min-h-32 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-md p-4">
+    <div v-else-if="error" class="inline-flex flex-col items-center justify-center gap-2 w-full min-h-32 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-md p-4">
       <UIcon name="i-lucide-image-off" class="text-red-400 dark:text-red-500 text-xl" />
       <span class="text-sm text-red-600 dark:text-red-400">图片加载失败</span>
     </div>

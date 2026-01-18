@@ -78,7 +78,7 @@ const filteredItems = computed(() => {
 </script>
 
 <template>
-  <div class="flex flex-wrap items-center gap-2">
+  <div class="inline-flex flex-wrap items-center gap-2 pl-7">
     <!-- 已选择的标签 -->
     <UBadge
       v-for="tag in selectedTags"
@@ -98,7 +98,7 @@ const filteredItems = computed(() => {
         :ui="{
           base: [
             'absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 rounded-full',
-            'p-0 text-gray-400 hover:text-gray-400 active:text-gray-400 cursor-pointer',
+            'p-0 text-neutral-400 hover:text-neutral-500 active:text-neutral-600 cursor-pointer',
             'group-hover:block hidden',
           ],
         }"
@@ -120,8 +120,7 @@ const filteredItems = computed(() => {
       size="xs"
       :ui="{
         base: 'w-40 h-4.5 border border-primary rounded-full py-0.5',
-        content: 'shadow-none focus:shadow-none',
-
+        content: 'focus:ring-1 focus:ring-primary',
       }"
       @create="handleCreate"
       @update:model-value="handleSelect"
@@ -137,7 +136,7 @@ const filteredItems = computed(() => {
       variant="outline"
       :padded="false"
       :ui="{
-        base: 'px-2 py-1 rounded-full cursor-pointer',
+        base: 'px-2 py-1 rounded-full cursor-pointer hover:bg-neutral-50 transition-all',
         leadingIcon: 'size-2.5',
       }"
       @click="showInput = true"

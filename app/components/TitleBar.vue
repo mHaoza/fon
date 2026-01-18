@@ -45,14 +45,14 @@ const controlList = computed(() => [
   <div class="title-bar flex select-none items-center">
     <div class="drag-bar pl-2 flex-1 flex items-center" data-tauri-drag-region>
       <img src="/logo.svg" alt="logo" class="h-5 w-auto pointer-events-none">
-      <span class="text-gray-400 font-bold pl-1 pointer-events-none">Fon</span>
+      <span class="text-neutral-400 font-bold pl-1 pointer-events-none">Fon</span>
     </div>
 
     <div class="flex">
       <div
         v-for="{ name, icon, action } in controlList"
         :key="name"
-        class="flex h-8 w-10 items-center justify-center hover:bg-gray-600/10 active:opacity-50"
+        class="flex h-8 w-10 items-center justify-center hover:bg-neutral-100 active:bg-neutral-200 transition-all cursor-pointer"
         :aria-label="name"
         @click="action()"
       >

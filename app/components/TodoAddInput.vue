@@ -76,11 +76,10 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="todo-input mx-2 mb-2 px-3 py-1 border rounded-md flex items-center"
+    class="todo-input mx-2 mb-2 px-3 py-1 border rounded-md flex items-center transition-all"
     :class="{
-      'border-blue-600': todoInput?.isFocused,
-      'border-gray-300': !todoInput?.isFocused,
-      'bg-gray-300/10 border-transparent': !todo.title && !todoInput?.isFocused,
+      'border-primary bg-white': todoInput?.isFocused,
+      'border-neutral-200 bg-neutral-50': !todoInput?.isFocused,
     }"
   >
     <TodoTitleInput

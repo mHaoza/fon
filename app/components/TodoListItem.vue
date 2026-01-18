@@ -88,24 +88,24 @@ const disabled = computed(() => {
 <template>
   <UContextMenu :items="getContextMenuItems(todo)">
     <div
-      class="todo-input px-3 rounded-md flex min-h-9 shadow-xs items-center relative"
-      :class="todoStore.activeTodoId === todo.id ? 'bg-gray-100' : 'hover:bg-gray-100/50'"
+      class="todo-input px-3 rounded-md flex items-center relative transition-all cursor-pointer border"
+      :class="todoStore.activeTodoId === todo.id ? 'bg-primary-50 border-primary-200' : 'hover:bg-neutral-50 border-transparent'"
       @click="handleTodoClick($event, todo)"
     >
       <UCheckbox
         v-model="checked"
         color="secondary"
-        class="mr-1"
+        class="mr-2"
         :disabled="disabled"
         @click.stop
       />
       <UInput
         v-model="todo.title"
-        class="flex-1"
         :tag-enabled="false"
         placeholder="无标题"
         :disabled="disabled"
         variant="none"
+        :class="`flex-1 ${todoStore.activeTodoId === todo.id ? 'bg-primary-50' : ''}`"
         @blur="updateTodoTitle(todo)"
       />
       <TagView :tag-list="todo.tags" :max-tag-count="2" />

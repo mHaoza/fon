@@ -149,7 +149,9 @@ defineExpose({ focus: () => editorRef.value?.editor?.commands.focus('end') })
       placeholder="输入内容或使用 / 快速插入..."
       :ui="{
         base: [
-          ' pb-8! [&_p]:leading-5',
+          ' pb-8! px-8! [&_p]:leading-5',
+          // h1, h2, h3,h4, h5, h6
+          '[&_h1]:text-lg [&_h2]:text-base [&_h3]:text-sm [&_h4]:text-sm [&_h5]:text-sm [&_h6]:text-sm',
           // Tables
           '[&_table]:w-full [&_table]:border-separate [&_table]:border-spacing-0 [&_table]:rounded-md',
           '[&_th]:py-3 [&_th]:px-4 [&_th]:font-semibold [&_th]:text-sm [&_th]:text-left [&_th]:bg-muted/50 [&_th]:border-t [&_th]:border-b [&_th]:border-e [&_th]:first:border-s [&_th]:border-muted',
@@ -165,10 +167,6 @@ defineExpose({ focus: () => editorRef.value?.editor?.commands.focus('end') })
           '[&_ul[data-type=taskList]_li_label_input]:appearance-none [&_ul[data-type=taskList]_li_label_input]:size-4 [&_ul[data-type=taskList]_li_label_input]:my-0.5 [&_ul[data-type=taskList]_li_label_input]:rounded-sm [&_ul[data-type=taskList]_li_label_input]:ring [&_ul[data-type=taskList]_li_label_input]:ring-inset [&_ul[data-type=taskList]_li_label_input]:ring-accented [&_ul[data-type=taskList]_li_label_input]:bg-center',
           '[&_ul[data-type=taskList]_li_label_input:checked]:bg-primary [&_ul[data-type=taskList]_li_label_input:checked]:ring-primary [&_ul[data-type=taskList]_li_label_input:checked]:bg-[url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTIwIDZMOSAxN2wtNS01Ii8+PC9zdmc+)] dark:[&_ul[data-type=taskList]_li_label_input:checked]:bg-[url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTIwIDZMOSAxN2wtNS01Ii8+PC9zdmc+)]',
           '[&_ul[data-type=taskList]_li[data-checked=true]>div>p]:line-through [&_ul[data-type=taskList]_li[data-checked=true]>div>p]:opacity-50',
-        ],
-        content: [
-          'max-w-4xl',
-          'mx-auto',
         ],
       }"
       @drop="handleDrop"
@@ -214,16 +212,13 @@ defineExpose({ focus: () => editorRef.value?.editor?.commands.focus('end') })
           return editor.isActive('image') && view.hasFocus()
         }"
       />
-      <UEditorSuggestionMenu
-        :editor="editor"
-        :items="suggestionItems"
-      /><UEditorDragHandle :editor="editor" />
+      <UEditorSuggestionMenu :editor="editor" :items="suggestionItems" />
+      <UEditorDragHandle :editor="editor" />
     </UEditor>
   </div>
 </template>
 
 <style>
-/* dark mode code block styles */
 html.dark .tiptap .shiki,
 html.dark .tiptap .shiki span {
   color: var(--shiki-dark) !important;

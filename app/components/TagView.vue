@@ -43,7 +43,7 @@ function switchTagList(tag: string) {
     <div
       v-for="(tag, index) in visibleTags"
       :key="index"
-      class="text-xs text-gray-800 leading-none px-2 py-0.5 border border-black/10 rounded-full inline-flex max-w-30 cursor-pointer whitespace-nowrap items-center overflow-hidden"
+      class="text-xs text-neutral-700 leading-none px-2.5 py-1 border border-neutral-200 rounded-full inline-flex max-w-30 cursor-pointer whitespace-nowrap items-center overflow-hidden transition-all hover:opacity-80 hover:scale-105"
       :style="{ backgroundColor: getTagColor(tag) }"
       :title="tag.length > maxTagTextLength ? tag : ''"
       @click="switchTagList(tag)"
@@ -53,7 +53,7 @@ function switchTagList(tag: string) {
 
     <div
       v-if="remainingTags.length > 0"
-      class="text-xs text-gray-600 leading-none line-height-none font-medium px-2 py-0.5 border border-black/10 rounded-full bg-gray-100 inline-flex cursor-pointer items-center"
+      class="text-xs text-neutral-600 leading-none font-medium px-2.5 py-1 border border-neutral-200 rounded-full bg-neutral-50 inline-flex cursor-pointer items-center hover:bg-neutral-100 transition-all"
       :title="remainingTags.join(', ')"
     >
       +{{ remainingTags.length }}
