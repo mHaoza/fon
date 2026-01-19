@@ -10,7 +10,12 @@ import { CodeBlockShiki } from 'tiptap-extension-code-block-shiki'
 import { useTodoStore } from '~/store/todo'
 import { useEditorSuggestions } from './composables/useEditorSuggestions'
 import { useEditorToolbar } from './composables/useEditorToolbar'
-import { handleDropUpload, handleFileUpload, handleImageUpload, handlePasteUpload } from './composables/useFileUploadHandler'
+import {
+  handleDropUpload,
+  handleFileUpload,
+  handleImageUpload,
+  handlePasteUpload,
+} from './composables/useFileUploadHandler'
 import CustomFile from './CustomFile'
 import CustomImage from './CustomImage'
 import LinkPopover from './LinkPopover.vue'
@@ -33,8 +38,10 @@ const customHandlers = {
     isDisabled: undefined,
   },
   table: {
-    canExecute: (editor: Editor) => editor.can().insertTable({ rows: 3, cols: 3, withHeaderRow: true }),
-    execute: (editor: Editor) => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }),
+    canExecute: (editor: Editor) =>
+      editor.can().insertTable({ rows: 3, cols: 3, withHeaderRow: true }),
+    execute: (editor: Editor) =>
+      editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }),
     isActive: (editor: Editor) => editor.isActive('table'),
     isDisabled: undefined,
   },
@@ -54,7 +61,8 @@ const customHandlers = {
 } satisfies EditorCustomHandlers
 
 const { suggestionItems } = useEditorSuggestions(customHandlers)
-const { bubbleToolbarItems, getImageToolbarItems, getTableToolbarItems } = useEditorToolbar(customHandlers)
+const { bubbleToolbarItems, getImageToolbarItems, getTableToolbarItems } =
+  useEditorToolbar(customHandlers)
 
 const content = computed({
   get: () => todoStore.activeTodo?.content || null,
@@ -178,17 +186,19 @@ defineExpose({ focus: () => editorRef.value?.editor?.commands.focus('end') })
         :editor="editor"
         :items="bubbleToolbarItems"
         layout="bubble"
-        :should-show="({ editor, view, state }: any) => {
-          if (
-            editor.isActive('image')
-            || editor.isActive('file')
-            || state.selection instanceof CellSelection
-          ) {
-            return false
+        :should-show="
+          ({ editor, view, state }: any) => {
+            if (
+              editor.isActive('image') ||
+              editor.isActive('file') ||
+              state.selection instanceof CellSelection
+            ) {
+              return false
+            }
+            const { selection } = state
+            return view.hasFocus() && !selection.empty
           }
-          const { selection } = state
-          return view.hasFocus() && !selection.empty
-        }"
+        "
       >
         <template #link>
           <LinkPopover :editor="editor" />
@@ -199,18 +209,22 @@ defineExpose({ focus: () => editorRef.value?.editor?.commands.focus('end') })
         :editor="editor"
         :items="getTableToolbarItems(editor)"
         layout="bubble"
-        :should-show="({ editor, view }: any) => {
-          return editor.state.selection instanceof CellSelection && view.hasFocus()
-        }"
+        :should-show="
+          ({ editor, view }: any) => {
+            return editor.state.selection instanceof CellSelection && view.hasFocus()
+          }
+        "
       />
 
       <UEditorToolbar
         :editor="editor"
         :items="getImageToolbarItems(editor)"
         layout="bubble"
-        :should-show="({ editor, view }: any) => {
-          return editor.isActive('image') && view.hasFocus()
-        }"
+        :should-show="
+          ({ editor, view }: any) => {
+            return editor.isActive('image') && view.hasFocus()
+          }
+        "
       />
       <UEditorSuggestionMenu :editor="editor" :items="suggestionItems" />
       <UEditorDragHandle :editor="editor" />

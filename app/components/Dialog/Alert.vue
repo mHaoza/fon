@@ -15,12 +15,9 @@ function handleClose(close: () => void) {
 </script>
 
 <template>
-  <UModal
-    :title="title"
-    :description="description"
-  >
+  <UModal :title="title" :description="description">
     <template #footer="{ close }">
-      <div class="flex items-center justify-end w-full">
+      <div class="flex w-full items-center justify-end">
         <UButton
           :label="buttonText || '确定'"
           :color="buttonColor || 'primary'"

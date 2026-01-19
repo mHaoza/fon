@@ -13,7 +13,7 @@ export function useTodoList(
   }
 
   async function refresh(queryInfo?: TodoListQuery) {
-    query.value = { ...defaultQuery(), ...(queryInfo ?? {}) }
+    query.value = { ...defaultQuery(), ...queryInfo }
     const result = await getListFn({ ...query.value })
     list.value = result.data
     total.value = result.total
@@ -21,9 +21,9 @@ export function useTodoList(
 
   async function loadMore() {
     if (
-      !query.value.page
-      || !query.value.page_size
-      || query.value.page * query.value.page_size >= total.value
+      !query.value.page ||
+      !query.value.page_size ||
+      query.value.page * query.value.page_size >= total.value
     ) {
       return
     }

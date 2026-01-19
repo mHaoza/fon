@@ -55,8 +55,7 @@ async function addTodo() {
     // 重置输入框
     todo.value = getDefaultTodoData()
     todoInput.value?.setContent(todo.value.title)
-  }
-  catch (error) {
+  } catch (error) {
     console.error('Failed to add todo:', error)
   }
 }
@@ -76,7 +75,7 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="todo-input mx-2 mb-2 px-3 py-1 border rounded-md flex items-center transition-all"
+    class="todo-input mx-2 mb-2 flex items-center rounded-md border px-3 py-1 transition-all"
     :class="{
       'border-primary bg-white': todoInput?.isFocused,
       'border-neutral-200 bg-neutral-50': !todoInput?.isFocused,

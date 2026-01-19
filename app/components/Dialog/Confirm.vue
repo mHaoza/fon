@@ -10,19 +10,16 @@ const props = defineProps<Props>()
 const isLoading = ref(false)
 
 async function handleConfirm(close: () => void) {
-  if (isLoading.value)
-    return
+  if (isLoading.value) return
 
   isLoading.value = true
   try {
     await props.onConfirm?.()
     close()
     props.onResolve(true)
-  }
-  catch (error) {
+  } catch (error) {
     console.error('Confirm failed:', error)
-  }
-  finally {
+  } finally {
     isLoading.value = false
   }
 }
@@ -35,13 +32,9 @@ function handleCancel(close: () => void) {
 </script>
 
 <template>
-  <UModal
-    :title="title"
-    :description="description"
-    :dismissible="!isLoading"
-  >
+  <UModal :title="title" :description="description" :dismissible="!isLoading">
     <template #footer="{ close }">
-      <div class="flex items-center justify-end gap-3 w-full">
+      <div class="flex w-full items-center justify-end gap-3">
         <UButton
           :label="cancelText || '取消'"
           color="neutral"

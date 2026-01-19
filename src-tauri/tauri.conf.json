@@ -6,14 +6,10 @@
   "app": {
     "windows": [],
     "security": {
-      "capabilities": [
-        "default-capability"
-      ],
+      "capabilities": ["default-capability"],
       "assetProtocol": {
         "enable": true,
-        "scope": [
-          "*/**"
-        ]
+        "scope": ["*/**"]
       },
       "csp": null,
       "dangerousDisableAssetCspModification": true

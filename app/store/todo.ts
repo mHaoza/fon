@@ -37,8 +37,7 @@ export const useTodoStore = defineStore('todo', () => {
     async (id) => {
       if (id) {
         activeTodo.value = await todosDb.getTodoById(id)
-      }
-      else {
+      } else {
         activeTodo.value = null
       }
     },
@@ -52,8 +51,7 @@ export const useTodoStore = defineStore('todo', () => {
       updateTodoList('add', result)
       tagStore.refreshTagList()
       return result
-    }
-    catch (error) {
+    } catch (error) {
       console.error('添加待办事项失败:', error)
       throw error
     }
@@ -90,8 +88,7 @@ export const useTodoStore = defineStore('todo', () => {
       // 从 deleted 列表移除
       updateTodoList('removeFromDeleted', id)
       tagStore.refreshTagList()
-    }
-    catch (error) {
+    } catch (error) {
       console.error('恢复待办事项失败:', error)
       throw error
     }
@@ -100,17 +97,19 @@ export const useTodoStore = defineStore('todo', () => {
   /** 更新待办列表 */
   function updateTodoList(type: 'add' | 'update', todo: Todo): void
   function updateTodoList(type: 'delete' | 'removeFromDeleted', id: number): void
-  function updateTodoList(type: 'add' | 'update' | 'delete' | 'removeFromDeleted', todoOrId: Todo | number) {
+  function updateTodoList(
+    type: 'add' | 'update' | 'delete' | 'removeFromDeleted',
+    todoOrId: Todo | number,
+  ) {
     if (type === 'add' && typeof todoOrId !== 'number') {
       // 按照 created_at DESC 排序插入到正确位置
       const targetList = todoOrId.is_done ? todos.done.list : todos.undone.list
       insertTodoInSortedOrder(targetList, todoOrId)
-    }
-    else if (type === 'update' && typeof todoOrId !== 'number') {
+    } else if (type === 'update' && typeof todoOrId !== 'number') {
       const todo = todoOrId
 
       // 检查 todo 在 undone 列表中是否存在且已完成
-      const undoneIndex = todos.undone.list.findIndex(item => item.id === todo.id)
+      const undoneIndex = todos.undone.list.findIndex((item) => item.id === todo.id)
       if (undoneIndex !== -1 && todo.is_done) {
         // 从 undone 列表中移除
         todos.undone.list.splice(undoneIndex, 1)
@@ -120,7 +119,7 @@ export const useTodoStore = defineStore('todo', () => {
       }
 
       // 检查 todo 在 done 列表中是否存在且未完成
-      const doneIndex = todos.done.list.findIndex(item => item.id === todo.id)
+      const doneIndex = todos.done.list.findIndex((item) => item.id === todo.id)
       if (doneIndex !== -1 && !todo.is_done) {
         // 从 done 列表中移除
         todos.done.list.splice(doneIndex, 1)
@@ -130,23 +129,21 @@ export const useTodoStore = defineStore('todo', () => {
       }
 
       // 如果状态没有变化，直接更新对应列表中的项目
-      (Object.keys(todos) as (keyof typeof todos)[]).forEach((key) => {
-        const index = todos[key as keyof typeof todos].list.findIndex(item => item.id === todo.id)
+      ;(Object.keys(todos) as (keyof typeof todos)[]).forEach((key) => {
+        const index = todos[key as keyof typeof todos].list.findIndex((item) => item.id === todo.id)
         if (index !== -1) {
           todos[key].list.splice(index, 1, todo)
         }
       })
-    }
-    else if (type === 'delete') {
+    } else if (type === 'delete') {
       ;(['undone', 'done'] as const).forEach((key) => {
-        const index = todos[key].list.findIndex(item => item.id === todoOrId)
+        const index = todos[key].list.findIndex((item) => item.id === todoOrId)
         if (index !== -1) {
           todos[key].list.splice(index, 1)
         }
       })
-    }
-    else if (type === 'removeFromDeleted') {
-      const index = todos.deleted.list.findIndex(item => item.id === todoOrId)
+    } else if (type === 'removeFromDeleted') {
+      const index = todos.deleted.list.findIndex((item) => item.id === todoOrId)
       if (index !== -1) {
         todos.deleted.list.splice(index, 1)
       }
@@ -165,8 +162,7 @@ export const useTodoStore = defineStore('todo', () => {
     if (insertIndex === -1) {
       // 如果没有找到合适的位置，插入到末尾
       list.push(todo)
-    }
-    else {
+    } else {
       // 插入到找到的位置
       list.splice(insertIndex, 0, todo)
     }

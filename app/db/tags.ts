@@ -35,10 +35,10 @@ export async function getOrCreateTag(name: string): Promise<Tag> {
 
   // 创建新标签
   const now = Date.now()
-  const result = await db.execute(
-    'INSERT INTO tags (name, created_at) VALUES ($1, $2)',
-    [name, now],
-  )
+  const result = await db.execute('INSERT INTO tags (name, created_at) VALUES ($1, $2)', [
+    name,
+    now,
+  ])
 
   const id = result.lastInsertId
   if (!id) {

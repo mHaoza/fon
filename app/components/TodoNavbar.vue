@@ -37,8 +37,7 @@ function getTagMenuItems(tagId: number, tagName: string) {
               await deleteTag(tagId, tagName)
             },
           })
-        }
-        else {
+        } else {
           // 没有关联的 todo，直接删除
           await deleteTag(tagId, tagName)
         }
@@ -68,15 +67,15 @@ const TodoNavbarItem = defineComponent({
     return () => (
       <div
         class={[
-          'sidebar-item px-3 py-2 rounded-md flex cursor-pointer items-center gap-2 transition-colors',
-          route.path.replace('/main/todo/', '') === props.value ? 'bg-primary-50 text-primary' : 'hover:bg-neutral-50 text-neutral-700',
+          'sidebar-item flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 transition-colors',
+          route.path.replace('/main/todo/', '') === props.value
+            ? 'bg-primary-50 text-primary'
+            : 'text-neutral-700 hover:bg-neutral-50',
         ]}
       >
         <UIcon name={props.icon} class="text-current" />
-        <div class="text-sm flex-1">{ props.label }</div>
-        <div class="sidebar-item-extra">
-          { slots.extra?.() }
-        </div>
+        <div class="flex-1 text-sm">{props.label}</div>
+        <div class="sidebar-item-extra">{slots.extra?.()}</div>
       </div>
     )
   },
@@ -84,7 +83,7 @@ const TodoNavbarItem = defineComponent({
 </script>
 
 <template>
-  <div class="p-3 border-r border-neutral-200 w-46">
+  <div class="w-46 border-r border-neutral-200 p-3">
     <!-- 基础分组 -->
     <TodoNavbarItem label="所有" value="all" icon="i-mdi-view-grid-outline" @click="go('all')" />
     <USeparator color="neutral" class="my-3" />
@@ -103,7 +102,10 @@ const TodoNavbarItem = defineComponent({
             @click="go(`tag/${tag.name}`)"
           >
             <template #extra>
-              <div class="rounded-full h-3 w-3" :style="{ backgroundColor: getTagColor(tag.name) }" />
+              <div
+                class="h-3 w-3 rounded-full"
+                :style="{ backgroundColor: getTagColor(tag.name) }"
+              />
             </template>
           </TodoNavbarItem>
         </UContextMenu>
@@ -111,7 +113,12 @@ const TodoNavbarItem = defineComponent({
     </Collapsible>
     <USeparator color="neutral" class="my-3" />
     <!-- 已删除 -->
-    <TodoNavbarItem label="已刪除" value="deleted" icon="i-mdi-delete-outline" @click="go('deleted')" />
+    <TodoNavbarItem
+      label="已刪除"
+      value="deleted"
+      icon="i-mdi-delete-outline"
+      @click="go('deleted')"
+    />
   </div>
 </template>
 

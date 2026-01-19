@@ -9,7 +9,7 @@ export interface TagOptions {
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     tag: {
-      setTag: (attributes: { label: string, id?: string }) => ReturnType
+      setTag: (attributes: { label: string; id?: string }) => ReturnType
     }
   }
 }
@@ -32,19 +32,17 @@ export const Tag = Node.create<TagOptions>({
     return {
       label: {
         default: null,
-        parseHTML: element => element.getAttribute('data-label'),
+        parseHTML: (element) => element.getAttribute('data-label'),
         renderHTML: (attributes) => {
-          if (!attributes.label)
-            return {}
+          if (!attributes.label) return {}
           return { 'data-label': attributes.label }
         },
       },
       id: {
         default: null,
-        parseHTML: element => element.getAttribute('data-id'),
+        parseHTML: (element) => element.getAttribute('data-id'),
         renderHTML: (attributes) => {
-          if (!attributes.id)
-            return {}
+          if (!attributes.id) return {}
           return { 'data-id': attributes.id }
         },
       },
@@ -59,7 +57,7 @@ export const Tag = Node.create<TagOptions>({
     return [
       'span',
       mergeAttributes(
-        { 'data-type': 'tag', 'class': 'tag' },
+        { 'data-type': 'tag', class: 'tag' },
         this.options.HTMLAttributes,
         HTMLAttributes,
       ),
@@ -74,13 +72,13 @@ export const Tag = Node.create<TagOptions>({
   addCommands() {
     return {
       setTag:
-        (attributes: { label: string, id?: string }) =>
-          ({ commands }: { commands: any }) => {
-            return commands.insertContent({
-              type: this.name,
-              attrs: attributes,
-            })
-          },
+        (attributes: { label: string; id?: string }) =>
+        ({ commands }: { commands: any }) => {
+          return commands.insertContent({
+            type: this.name,
+            attrs: attributes,
+          })
+        },
     }
   },
 
@@ -128,8 +126,7 @@ export const Tag = Node.create<TagOptions>({
         find: new RegExp(`${this.options.char}([^\\s${this.options.char}]+)\\s$`),
         handler: ({ state, range, match }) => {
           const tagLabel = match[1]
-          if (!tagLabel)
-            return null
+          if (!tagLabel) return null
 
           const { tr } = state
           const start = range.from
@@ -153,8 +150,7 @@ export const Tag = Node.create<TagOptions>({
           }
 
           const tagType = state.schema.nodes.tag
-          if (!tagType)
-            return null
+          if (!tagType) return null
 
           tr.delete(start, end)
           const tagNode = tagType.create({
@@ -175,8 +171,7 @@ export const Tag = Node.create<TagOptions>({
         key: new PluginKey('tagSpaceHandler'),
         props: {
           handleKeyDown: (view: any, event: KeyboardEvent) => {
-            if (event.key !== 'Backspace')
-              return false
+            if (event.key !== 'Backspace') return false
 
             const { state } = view
             const { selection } = state
@@ -192,9 +187,7 @@ export const Tag = Node.create<TagOptions>({
                 if ($posBeforeSpace.nodeBefore?.type.name === 'tag') {
                   // 删除 tag 和空格
                   const tagStart = posBeforeSpace - $posBeforeSpace.nodeBefore.nodeSize
-                  view.dispatch(
-                    state.tr.delete(tagStart, $from.pos),
-                  )
+                  view.dispatch(state.tr.delete(tagStart, $from.pos))
                   return true
                 }
               }

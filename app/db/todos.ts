@@ -74,14 +74,17 @@ export async function initTodosDb() {
 
 // 获取待办事项的标签列表
 async function getTodoTags(todoId: number): Promise<string[]> {
-  const result = await db.select<{ name: string }[]>(`
+  const result = await db.select<{ name: string }[]>(
+    `
     SELECT t.name FROM tags t
     INNER JOIN todo_tags tt ON t.id = tt.tag_id
     WHERE tt.todo_id = $1
     ORDER BY t.name ASC
-  `, [todoId])
+  `,
+    [todoId],
+  )
 
-  return result.map(row => row.name)
+  return result.map((row) => row.name)
 }
 
 // 同步待办事项的标签关联
@@ -92,10 +95,7 @@ async function syncTodoTags(todoId: number, tags: string[]): Promise<void> {
   // 添加新的标签关联
   for (const tagName of tags) {
     const tag = await getOrCreateTag(tagName)
-    await db.execute(
-      'INSERT INTO todo_tags (todo_id, tag_id) VALUES ($1, $2)',
-      [todoId, tag.id],
-    )
+    await db.execute('INSERT INTO todo_tags (todo_id, tag_id) VALUES ($1, $2)', [todoId, tag.id])
   }
 }
 
@@ -103,26 +103,29 @@ async function syncTodoTags(todoId: number, tags: string[]): Promise<void> {
 export async function addTodo(todoCreate: TodoCreate): Promise<Todo> {
   const now = Date.now()
 
-  const result = await db.execute(`
+  const result = await db.execute(
+    `
     INSERT INTO todos (
       title, date, repeat, end_repeat_type, end_repeat_date,
       remaining_count, content, category, is_done, is_deleted,
       created_at, updated_at
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-  `, [
-    todoCreate.title,
-    todoCreate.date,
-    todoCreate.repeat,
-    todoCreate.end_repeat_type,
-    todoCreate.end_repeat_date,
-    todoCreate.remaining_count,
-    todoCreate.content,
-    todoCreate.category,
-    todoCreate.is_done ? 1 : 0,
-    todoCreate.is_deleted ? 1 : 0,
-    now,
-    now,
-  ])
+  `,
+    [
+      todoCreate.title,
+      todoCreate.date,
+      todoCreate.repeat,
+      todoCreate.end_repeat_type,
+      todoCreate.end_repeat_date,
+      todoCreate.remaining_count,
+      todoCreate.content,
+      todoCreate.category,
+      todoCreate.is_done ? 1 : 0,
+      todoCreate.is_deleted ? 1 : 0,
+      now,
+      now,
+    ],
+  )
 
   // 获取自动生成的 id
   const id = result.lastInsertId
@@ -230,10 +233,10 @@ export async function updateTodo(update: Partial<Todo> & { id: number }): Promis
 
 // 删除待办事项（软删除）
 export async function deleteTodo(id: number): Promise<void> {
-  await db.execute(
-    'UPDATE todos SET is_deleted = 1, updated_at = $1 WHERE id = $2',
-    [Date.now(), id],
-  )
+  await db.execute('UPDATE todos SET is_deleted = 1, updated_at = $1 WHERE id = $2', [
+    Date.now(),
+    id,
+  ])
 }
 
 // 永久删除待办事项
@@ -247,10 +250,10 @@ export async function permanentlyDeleteTodo(id: number): Promise<void> {
 
 // 恢复待办事项
 export async function restoreTodo(id: number): Promise<Todo> {
-  await db.execute(
-    'UPDATE todos SET is_deleted = 0, updated_at = $1 WHERE id = $2',
-    [Date.now(), id],
-  )
+  await db.execute('UPDATE todos SET is_deleted = 0, updated_at = $1 WHERE id = $2', [
+    Date.now(),
+    id,
+  ])
 
   const todo = await getTodoById(id)
   if (!todo) {
@@ -337,7 +340,9 @@ export async function getTodoList(query: TodoListQuery): Promise<PaginationListR
 }
 
 // 获取已删除的待办事项列表
-export async function getDeletedTodoList(query: TodoListQuery): Promise<PaginationListResponse<Todo>> {
+export async function getDeletedTodoList(
+  query: TodoListQuery,
+): Promise<PaginationListResponse<Todo>> {
   const { whereClause, params } = buildWhereClause(query, true)
 
   // 排序

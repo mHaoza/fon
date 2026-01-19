@@ -4,10 +4,7 @@ import { nanoid } from 'nanoid'
 import { useSettingStore } from '~/store/setting'
 
 /** 上传文件（写入 $RESOURCE 目录） */
-export async function uploadFile(options: {
-  path: string
-  file: File
-}) {
+export async function uploadFile(options: { path: string; file: File }) {
   const settingStore = useSettingStore()
   const content = await fileToUint8Array(options.file)
 
@@ -16,15 +13,16 @@ export async function uploadFile(options: {
   const baseFileName = `${dayjs().format('YYYYMMDD_HHmmss')}_${nanoid(8)}`
   const fileName = extension ? `${baseFileName}.${extension}` : baseFileName
 
-  const relativePath = `${settingStore.RESOURCE_DIR}/${options.path}`.replace(/\\/g, '/').replace(/\/\//g, '/')
+  const relativePath = `${settingStore.RESOURCE_DIR}/${options.path}`
+    .replace(/\\/g, '/')
+    .replace(/\/\//g, '/')
   const fullPath = `${relativePath}/${fileName}`.replace(/\\/g, '/').replace(/\/\//g, '/')
 
   // 确保目录存在
   if (relativePath) {
     try {
       await mkdir(relativePath, { baseDir: settingStore.BASE_DIR, recursive: true })
-    }
-    catch {}
+    } catch {}
   }
 
   await writeFile(fullPath, content, { baseDir: settingStore.BASE_DIR })
@@ -38,7 +36,7 @@ export async function uploadFile(options: {
 /** 打开文件选择对话框 */
 export async function selectFiles(
   options: {
-  /** 接受的文件类型，例如 'image/*' 或 '.pdf,.doc' */
+    /** 接受的文件类型，例如 'image/*' 或 '.pdf,.doc' */
     accept?: string
     /** 是否允许多选 */
     multiple?: boolean

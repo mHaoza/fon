@@ -15,15 +15,12 @@ async function handleButtonClick(button: DialogButton, index: number, close: () 
 </script>
 
 <template>
-  <UModal
-    :title="title"
-    :description="description"
-  >
+  <UModal :title="title" :description="description">
     <template v-if="content" #body>
       <component :is="content" />
     </template>
     <template v-if="buttons" #footer="{ close }">
-      <div class="flex items-center justify-end gap-3 w-full">
+      <div class="flex w-full items-center justify-end gap-3">
         <UButton
           v-for="(button, index) in buttons"
           :key="index"

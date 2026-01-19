@@ -9,8 +9,11 @@ import { useSettingStore } from '~/store/setting'
  */
 export async function getFileList(subPath?: string) {
   const settingStore = useSettingStore()
-  const base = subPath && subPath.length > 0 ? `${settingStore.RESOURCE_DIR}/${subPath}` : settingStore.RESOURCE_DIR
-  const items: { name: string, path: string }[] = []
+  const base =
+    subPath && subPath.length > 0
+      ? `${settingStore.RESOURCE_DIR}/${subPath}`
+      : settingStore.RESOURCE_DIR
+  const items: { name: string; path: string }[] = []
 
   const entries = await readDir(base, { baseDir: settingStore.BASE_DIR })
   for (const entry of entries) {
@@ -53,18 +56,12 @@ export function guessMimeType(filename: string): string {
   const ext = getFileExtension(filename)
   if (['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'svg'].includes(ext))
     return `image/${ext === 'jpg' ? 'jpeg' : ext}`
-  if (['mp4', 'webm', 'ogg', 'mov', 'mkv'].includes(ext))
-    return `video/${ext}`
-  if (['mp3', 'wav', 'ogg', 'flac', 'aac'].includes(ext))
-    return `audio/${ext}`
-  if (ext === 'pdf')
-    return 'application/pdf'
-  if (['zip', 'rar', '7z'].includes(ext))
-    return 'application/zip'
-  if (['txt', 'md', 'log'].includes(ext))
-    return 'text/plain'
-  if (['json'].includes(ext))
-    return 'application/json'
+  if (['mp4', 'webm', 'ogg', 'mov', 'mkv'].includes(ext)) return `video/${ext}`
+  if (['mp3', 'wav', 'ogg', 'flac', 'aac'].includes(ext)) return `audio/${ext}`
+  if (ext === 'pdf') return 'application/pdf'
+  if (['zip', 'rar', '7z'].includes(ext)) return 'application/zip'
+  if (['txt', 'md', 'log'].includes(ext)) return 'text/plain'
+  if (['json'].includes(ext)) return 'application/json'
   return 'application/octet-stream'
 }
 

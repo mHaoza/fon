@@ -16,9 +16,11 @@ function updateLastFileNode(editor: Editor, attrs?: Record<string, any>) {
 
   if (attrs) {
     editor.chain().updateAttributes('file', attrs).run()
-  }
-  else {
-    editor.chain().deleteRange({ from: lastPos, to: lastPos + 1 }).run()
+  } else {
+    editor
+      .chain()
+      .deleteRange({ from: lastPos, to: lastPos + 1 })
+      .run()
   }
 }
 
@@ -41,8 +43,7 @@ function updateLastImageNode(editor: Editor, attrs?: Record<string, any>) {
   const tr = editor.state.tr
   if (attrs) {
     tr.setNodeMarkup(lastPos, undefined, { ...lastNode.attrs, ...attrs })
-  }
-  else {
+  } else {
     tr.delete(lastPos, lastPos + 1)
   }
   editor.view.dispatch(tr)
@@ -52,10 +53,14 @@ function updateLastImageNode(editor: Editor, attrs?: Record<string, any>) {
 async function uploadFileNode(editor: Editor, todoId: number, file: File) {
   try {
     // 插入加载中的文件节点
-    editor.chain().focus().insertContent({
-      type: 'file',
-      attrs: { path: '', name: file.name, loading: true },
-    }).run()
+    editor
+      .chain()
+      .focus()
+      .insertContent({
+        type: 'file',
+        attrs: { path: '', name: file.name, loading: true },
+      })
+      .run()
 
     // 上传文件
     const result = await uploadFile({ path: `todos/${todoId}`, file })
@@ -66,8 +71,7 @@ async function uploadFileNode(editor: Editor, todoId: number, file: File) {
       name: file.name,
       loading: false,
     })
-  }
-  catch (error) {
+  } catch (error) {
     console.error('文件上传失败:', error)
     updateLastFileNode(editor) // 删除失败的节点
   }
@@ -77,10 +81,14 @@ async function uploadFileNode(editor: Editor, todoId: number, file: File) {
 async function uploadImageNode(editor: Editor, todoId: number, file: File) {
   try {
     // 插入加载中的图片节点
-    editor.chain().focus().insertContent({
-      type: 'image',
-      attrs: { src: '', alt: file.name, loading: true },
-    }).run()
+    editor
+      .chain()
+      .focus()
+      .insertContent({
+        type: 'image',
+        attrs: { src: '', alt: file.name, loading: true },
+      })
+      .run()
 
     // 上传图片
     const result = await uploadFile({ path: `todos/${todoId}`, file })
@@ -90,8 +98,7 @@ async function uploadImageNode(editor: Editor, todoId: number, file: File) {
       src: result.path,
       alt: file.name,
     })
-  }
-  catch (error) {
+  } catch (error) {
     console.error('图片上传失败:', error)
     updateLastImageNode(editor) // 删除失败的节点
   }
@@ -125,8 +132,7 @@ export async function handleDropUpload(editor: Editor, todoId: number, event: Dr
 
   if (file.type.startsWith('image/')) {
     await uploadImageNode(editor, todoId, file)
-  }
-  else {
+  } else {
     await uploadFileNode(editor, todoId, file)
   }
 }
@@ -157,8 +163,7 @@ export async function handlePasteUpload(editor: Editor, todoId: number, event: C
 
   if (file.type.startsWith('image/')) {
     await uploadImageNode(editor, todoId, file)
-  }
-  else {
+  } else {
     await uploadFileNode(editor, todoId, file)
   }
 }

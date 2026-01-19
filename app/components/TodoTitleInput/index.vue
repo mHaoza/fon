@@ -6,23 +6,26 @@ import { useTagInput } from './useChannelMention'
 
 import { extractTags } from './utils'
 
-const props = withDefaults(defineProps<{
-  placeholder?: string
-  tagEnabled?: boolean
-  editable?: boolean
-}>(), {
-  placeholder: '输入 #标签名 然后按空格，或输入 # 打开菜单...',
-  tagEnabled: true,
-  editable: true,
-})
+const props = withDefaults(
+  defineProps<{
+    placeholder?: string
+    tagEnabled?: boolean
+    editable?: boolean
+  }>(),
+  {
+    placeholder: '输入 #标签名 然后按空格，或输入 # 打开菜单...',
+    tagEnabled: true,
+    editable: true,
+  },
+)
 
-const emit = defineEmits<{ enter: [], focus: [], blur: [] }>()
+const emit = defineEmits<{ enter: []; focus: []; blur: [] }>()
 
 const modelValue = defineModel<string>('value', { default: '' })
 
 const value = computed({
   get: () => modelValue.value || null,
-  set: value => modelValue.value = value || '',
+  set: (value) => (modelValue.value = value || ''),
 })
 
 const tagInputExtension = props.tagEnabled ? useTagInput('#') : null
@@ -35,10 +38,7 @@ const extensions = computed(() => {
   //   Paragraph.extend({ content: 'inline*' }),
   //   Text,
   // ]
-  return [
-    // ...singleLineExtensions,
-    ...(tagInputExtension ? [tagInputExtension] : []),
-  ]
+  return tagInputExtension ? [tagInputExtension] : []
 })
 
 const editorRef = useTemplateRef('editorRef')
@@ -55,7 +55,10 @@ const editorProps = {
   },
   // 处理粘贴的纯文本，将换行符替换为空格
   transformPastedText(text: string) {
-    return text.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim()
+    return text
+      .replace(/[\r\n]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
   },
   // 处理粘贴的 HTML，移除块级元素
   transformPastedHTML(html: string) {
@@ -116,15 +119,19 @@ defineExpose({
     }"
     :editable="props.editable"
     autofocus
-    class="w-full max-h-21 overflow-auto"
-    @focus="() => {
-      isFocused = true
-      emit('focus')
-    }"
-    @blur="() => {
-      isFocused = false
-      emit('blur')
-    }"
+    class="max-h-21 w-full overflow-auto"
+    @focus="
+      () => {
+        isFocused = true
+        emit('focus')
+      }
+    "
+    @blur="
+      () => {
+        isFocused = false
+        emit('blur')
+      }
+    "
   >
     <template #default="{ editor }">
       <TodoTitleInputTagMenu v-if="tagEnabled" :editor="editor" char="#" />

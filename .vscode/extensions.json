@@ -1,7 +1,6 @@
 {
   "recommendations": [
-    // eslint
-    "dbaeumer.vscode-eslint",
+    "oxc.oxc-vscode",
     // iconify
     "afzalsayed96.icones",
     "antfu.iconify",
@@ -9,14 +8,13 @@
     "bradlc.vscode-tailwindcss",
     // tauri
     "tauri-apps.tauri-vscode",
+    // rust
+    "rust-lang.rust-analyzer",
     // other...
     "editorconfig.editorconfig",
     "mhutchie.git-graph",
     "naumovs.color-highlight",
     "pkief.material-icon-theme",
-    "vue.volar",
-
-    // rust
-    "rust-lang.rust-analyzer"
+    "vue.volar"
   ]
 }

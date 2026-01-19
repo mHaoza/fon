@@ -43,8 +43,7 @@ function runRelease() {
   return new Promise((resolve, reject) => {
     const child = spawn('node', [scriptPath, versionArg], { stdio: 'inherit' })
     child.on('exit', (code) => {
-      if (code === 0)
-        resolve()
+      if (code === 0) resolve()
       else reject(new Error('release-version failed'))
     })
   })
@@ -65,22 +64,19 @@ async function run() {
     const data = await readFile(packageJsonPath, 'utf8')
     const pkg = JSON.parse(data)
     tag = `v${pkg.version}`
-  }
-  else if (versionArg === 'beta') {
+  } else if (versionArg === 'beta') {
     // 读取 package.json 里的主版本
     const packageJsonPath = path.join(rootDir, 'package.json')
     const data = await readFile(packageJsonPath, 'utf8')
     const pkg = JSON.parse(data)
     tag = `v${pkg.version}`
-  }
-  else if (versionArg === 'rc') {
+  } else if (versionArg === 'rc') {
     // 读取 package.json 里的主版本
     const packageJsonPath = path.join(rootDir, 'package.json')
     const data = await readFile(packageJsonPath, 'utf8')
     const pkg = JSON.parse(data)
     tag = `v${pkg.version}`
-  }
-  else if (isSemver(versionArg)) {
+  } else if (isSemver(versionArg)) {
     // 1.2.3 或 v1.2.3
     tag = versionArg.startsWith('v') ? versionArg : `v${versionArg}`
   }
@@ -91,15 +87,13 @@ async function run() {
       execSync(`git tag ${tag}`, { stdio: 'inherit' })
       execSync(`git push origin ${tag}`, { stdio: 'inherit' })
       console.log(`[INFO]: Git tag ${tag} created and pushed.`)
-    }
-    catch {
+    } catch {
       console.error(`[ERROR]: Failed to create or push git tag: ${tag}`)
       process.exit(1)
     }
-  }
-  else {
+  } else {
     console.log('[INFO]: No git tag created for this version.')
   }
 }
 
-run()
+await run()

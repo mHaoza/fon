@@ -16,7 +16,7 @@ const selectedTags = computed({
 })
 
 // 可选的建议标签
-const availableTags = computed(() => tagStore.tagList.map(tag => tag.name))
+const availableTags = computed(() => tagStore.tagList.map((tag) => tag.name))
 
 // 是否显示输入框
 const showInput = ref(false)
@@ -37,7 +37,7 @@ function addTag(tag?: string) {
 }
 
 function removeTag(tag: string) {
-  selectedTags.value = selectedTags.value.filter(t => t !== tag)
+  selectedTags.value = selectedTags.value.filter((t) => t !== tag)
 }
 
 function handleCreate(item: string) {
@@ -57,8 +57,7 @@ function handleBlur() {
   setTimeout(() => {
     if (currentTag.value && typeof currentTag.value === 'string') {
       addTag()
-    }
-    else {
+    } else {
       showInput.value = false
     }
   }, 200)
@@ -73,7 +72,7 @@ watch(showInput, (newVal) => {
 })
 
 const filteredItems = computed(() => {
-  return availableTags.value.filter(tag => !selectedTags.value.includes(tag))
+  return availableTags.value.filter((tag) => !selectedTags.value.includes(tag))
 })
 </script>
 
@@ -85,7 +84,7 @@ const filteredItems = computed(() => {
       :key="tag"
       color="neutral"
       variant="soft"
-      class="group inline-flex items-center gap-1.5 rounded-full relative cursor-pointer"
+      class="group relative inline-flex cursor-pointer items-center gap-1.5 rounded-full"
       :style="{ backgroundColor: getTagColor(tag) }"
     >
       <span class="px-0.5 leading-2.5">{{ tag }}</span>

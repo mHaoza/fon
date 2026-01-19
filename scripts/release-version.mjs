@@ -45,9 +45,8 @@ import process from 'node:process'
 function getGitShortCommit() {
   try {
     return execSync('git rev-parse --short HEAD').toString().trim()
-  }
-  catch {
-    console.warn('[WARN]: Failed to get git short commit, fallback to \'nogit\'')
+  } catch {
+    console.warn("[WARN]: Failed to get git short commit, fallback to 'nogit'")
     return 'nogit'
   }
 }
@@ -78,7 +77,9 @@ function generateShortTimestamp(withCommit = false) {
  * @returns {boolean} 是否为有效的版本号格式
  */
 function isValidVersion(version) {
-  return /^v?\d+\.\d+\.\d+(?:-(?:alpha|beta|rc)(?:\.\d+)?)?(?:\+[a-z0-9-]+(?:\.[a-z0-9-]+)*)?$/i.test(version)
+  return /^v?\d+\.\d+\.\d+(?:-(?:alpha|beta|rc)(?:\.\d+)?)?(?:\+[a-z0-9-]+(?:\.[a-z0-9-]+)*)?$/i.test(
+    version,
+  )
 }
 
 /**
@@ -108,7 +109,12 @@ function getBaseVersion(version) {
  */
 async function updatePackageVersion(packagePath, newVersion) {
   try {
-    if (!(await fs.access(packagePath).then(() => true).catch(() => false))) {
+    if (
+      !(await fs
+        .access(packagePath)
+        .then(() => true)
+        .catch(() => false))
+    ) {
       console.warn(`[WARN]: ${packagePath} not found, skipping`)
       return
     }
@@ -121,8 +127,7 @@ async function updatePackageVersion(packagePath, newVersion) {
 
     await fs.writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`, 'utf8')
     console.log(`[INFO]: ${packagePath} version updated to: ${packageJson.version}`)
-  }
-  catch (error) {
+  } catch (error) {
     console.error(`Error updating ${packagePath} version:`, error)
     throw error
   }
@@ -135,7 +140,12 @@ async function updatePackageVersion(packagePath, newVersion) {
 async function updateCargoVersion(newVersion) {
   const cargoTomlPath = path.join(process.cwd(), 'src-tauri/Cargo.toml')
   try {
-    if (!(await fs.access(cargoTomlPath).then(() => true).catch(() => false))) {
+    if (
+      !(await fs
+        .access(cargoTomlPath)
+        .then(() => true)
+        .catch(() => false))
+    ) {
       console.warn('[WARN]: Cargo.toml not found, skipping')
       return
     }
@@ -153,8 +163,7 @@ async function updateCargoVersion(newVersion) {
 
     await fs.writeFile(cargoTomlPath, updatedLines.join('\n'), 'utf8')
     console.log(`[INFO]: Cargo.toml version updated to: ${versionWithoutV}`)
-  }
-  catch (error) {
+  } catch (error) {
     console.error('Error updating Cargo.toml version:', error)
     throw error
   }
@@ -167,7 +176,12 @@ async function updateCargoVersion(newVersion) {
 async function updateCargoLockVersion(newVersion) {
   const cargoLockPath = path.join(process.cwd(), 'src-tauri/Cargo.lock')
   try {
-    if (!(await fs.access(cargoLockPath).then(() => true).catch(() => false))) {
+    if (
+      !(await fs
+        .access(cargoLockPath)
+        .then(() => true)
+        .catch(() => false))
+    ) {
       console.warn('[WARN]: Cargo.lock not found, skipping')
       return
     }
@@ -181,8 +195,14 @@ async function updateCargoLockVersion(newVersion) {
       if (line.trim().startsWith('name = "fon"')) {
         // 找到下一行的版本行并更新
         const currentIndex = lines.indexOf(line)
-        if (currentIndex + 1 < lines.length && lines[currentIndex + 1].trim().startsWith('version =')) {
-          lines[currentIndex + 1] = lines[currentIndex + 1].replace(/version = "[^"]+"/, `version = "${versionWithoutV}"`)
+        if (
+          currentIndex + 1 < lines.length &&
+          lines[currentIndex + 1].trim().startsWith('version =')
+        ) {
+          lines[currentIndex + 1] = lines[currentIndex + 1].replace(
+            /version = "[^"]+"/,
+            `version = "${versionWithoutV}"`,
+          )
         }
       }
       return line
@@ -190,8 +210,7 @@ async function updateCargoLockVersion(newVersion) {
 
     await fs.writeFile(cargoLockPath, updatedLines.join('\n'), 'utf8')
     console.log(`[INFO]: Cargo.lock version updated to: ${versionWithoutV}`)
-  }
-  catch (error) {
+  } catch (error) {
     console.error('Error updating Cargo.lock version:', error)
     throw error
   }
@@ -204,7 +223,12 @@ async function updateCargoLockVersion(newVersion) {
 async function updateTauriConfigVersion(newVersion) {
   const tauriConfigPath = path.join(process.cwd(), 'src-tauri/tauri.conf.json')
   try {
-    if (!(await fs.access(tauriConfigPath).then(() => true).catch(() => false))) {
+    if (
+      !(await fs
+        .access(tauriConfigPath)
+        .then(() => true)
+        .catch(() => false))
+    ) {
       console.warn('[WARN]: tauri.conf.json not found, skipping')
       return
     }
@@ -220,8 +244,7 @@ async function updateTauriConfigVersion(newVersion) {
 
     await fs.writeFile(tauriConfigPath, `${JSON.stringify(tauriConfig, null, 2)}\n`, 'utf8')
     console.log(`[INFO]: tauri.conf.json version updated to: ${versionWithoutV}`)
-  }
-  catch (error) {
+  } catch (error) {
     console.error('Error updating tauri.conf.json version:', error)
     throw error
   }
@@ -236,8 +259,7 @@ async function getCurrentVersion() {
     const data = await fs.readFile(packageJsonPath, 'utf8')
     const packageJson = JSON.parse(data)
     return packageJson.version
-  }
-  catch (error) {
+  } catch (error) {
     console.error('Error getting current version:', error)
     throw error
   }
@@ -263,21 +285,17 @@ async function main(versionArg) {
       if (versionArg.toLowerCase() === 'autobuild') {
         // 格式: 2.3.0+autobuild.2501011530.cc39b27
         newVersion = `${baseVersion}+autobuild.${generateShortTimestamp(true)}`
-      }
-      else if (versionArg.toLowerCase() === 'autobuild-latest') {
+      } else if (versionArg.toLowerCase() === 'autobuild-latest') {
         // 格式: 2.3.0+autobuild.250101.a1b2c3d
         const gitShort = getGitShortCommit()
         newVersion = `${baseVersion}+autobuild.${generateShortTimestamp()}.${gitShort}`
-      }
-      else if (versionArg.toLowerCase() === 'deploytest') {
+      } else if (versionArg.toLowerCase() === 'deploytest') {
         // 格式: 2.3.0+deploytest.2501011530.cc39b27
         newVersion = `${baseVersion}+deploytest.${generateShortTimestamp(true)}`
-      }
-      else {
+      } else {
         newVersion = `${baseVersion}-${versionArg.toLowerCase()}`
       }
-    }
-    else {
+    } else {
       if (!isValidVersion(versionArg)) {
         console.error('Error: Invalid version format')
         process.exit(1)
@@ -308,13 +326,11 @@ async function main(versionArg) {
       execSync('git push', { stdio: 'inherit' })
 
       console.log('[SUCCESS]: Git commit completed successfully!')
-    }
-    catch (error) {
+    } catch (error) {
       console.error('[ERROR]: Failed to commit changes to git:', error)
       process.exit(1)
     }
-  }
-  catch (error) {
+  } catch (error) {
     console.error('[ERROR]: Failed to update versions:', error)
     process.exit(1)
   }

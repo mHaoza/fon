@@ -36,50 +36,57 @@ async function handleDoubleClick() {
     // 本地图片，获取绝对路径后打开
     const localPath = await getLocalFilePath(src)
     await openPath(localPath)
-  }
-  catch (err) {
+  } catch (err) {
     console.error('打开图片失败:', err)
   }
 }
 
 // 监听 src 变化
-watch(() => props.node.attrs.src, async (newSrc) => {
-  if (newSrc) {
-    loading.value = true
-    error.value = false
-    try {
-      fullUrl.value = await resolveFileSrc(newSrc)
+watch(
+  () => props.node.attrs.src,
+  async (newSrc) => {
+    if (newSrc) {
+      loading.value = true
+      error.value = false
+      try {
+        fullUrl.value = await resolveFileSrc(newSrc)
+      } catch (err) {
+        console.error('解析文件路径失败:', err)
+        error.value = true
+      } finally {
+        loading.value = false
+      }
     }
-    catch (err) {
-      console.error('解析文件路径失败:', err)
-      error.value = true
-    }
-    finally {
-      loading.value = false
-    }
-  }
-}, { immediate: true })
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
-  <NodeViewWrapper
-    class="relative rounded-md"
-    :class="{ 'ring-2 ring-primary-500': selected }"
-  >
+  <NodeViewWrapper class="relative rounded-md" :class="{ 'ring-primary-500 ring-2': selected }">
     <img
       v-if="!loading && !error && fullUrl"
       :src="fullUrl"
       :alt="node.attrs.alt"
       :title="node.attrs.title || '双击打开图片'"
-      class="max-w-full h-auto rounded-md cursor-pointer hover:opacity-90 transition-opacity"
+      class="h-auto max-w-full cursor-pointer rounded-md transition-opacity hover:opacity-90"
       @error="handleImageError"
       @dblclick="handleDoubleClick"
+    />
+    <div
+      v-else-if="loading"
+      class="inline-flex min-h-32 w-full items-center justify-center rounded-md bg-neutral-100 dark:bg-neutral-800"
     >
-    <div v-else-if="loading" class="inline-flex items-center justify-center w-full min-h-32 bg-neutral-100 dark:bg-neutral-800 rounded-md">
-      <UIcon name="i-lucide-loader-circle" class="animate-spin text-neutral-400 dark:text-neutral-500" />
+      <UIcon
+        name="i-lucide-loader-circle"
+        class="animate-spin text-neutral-400 dark:text-neutral-500"
+      />
     </div>
-    <div v-else-if="error" class="inline-flex flex-col items-center justify-center gap-2 w-full min-h-32 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-md p-4">
-      <UIcon name="i-lucide-image-off" class="text-red-400 dark:text-red-500 text-xl" />
+    <div
+      v-else-if="error"
+      class="inline-flex min-h-32 w-full flex-col items-center justify-center gap-2 rounded-md border border-red-200 bg-red-50 p-4 dark:border-red-700 dark:bg-red-900/20"
+    >
+      <UIcon name="i-lucide-image-off" class="text-xl text-red-400 dark:text-red-500" />
       <span class="text-sm text-red-600 dark:text-red-400">图片加载失败</span>
     </div>
   </NodeViewWrapper>

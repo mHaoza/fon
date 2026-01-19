@@ -17,8 +17,7 @@ export const useTagStore = defineStore('tag', () => {
       // 刷新所有待办列表，因为标签已从相关的 todo 中移除
       todoStore.todos.undone.refresh({ tags: [route.params.tagName as string] })
       todoStore.todos.done.refresh({ tags: [route.params.tagName as string] })
-    }
-    catch (error) {
+    } catch (error) {
       console.error('删除标签失败:', error)
       throw error
     }

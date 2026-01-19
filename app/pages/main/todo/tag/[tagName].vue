@@ -22,13 +22,11 @@ const list = computed(() => {
 </script>
 
 <template>
-  <div class="border-r border-neutral-200 flex flex-col h-full">
-    <div class="text-xl font-semibold p-3 text-neutral-800">
-      #{{ $route.params.tagName }}
-    </div>
+  <div class="flex h-full flex-col border-r border-neutral-200">
+    <div class="p-3 text-xl font-semibold text-neutral-800">#{{ $route.params.tagName }}</div>
     <TodoAddInput :placeholder="`+ 添加任务到 #${$route.params.tagName}`" />
 
-    <UScrollArea virtualize :items="list" item-key="id" class="[scrollbar-gutter:stable] pb-6">
+    <UScrollArea virtualize :items="list" item-key="id" class="pb-6 [scrollbar-gutter:stable]">
       <template #default="{ item }">
         <Collapsible
           v-if="'itemType' in item && item.itemType === 'done'"
@@ -37,12 +35,12 @@ const list = computed(() => {
           class="my-2"
         >
           <template #triggerExtra>
-            <span class="text-xs text-neutral-500 font-medium ml-2">
+            <span class="ml-2 text-xs font-medium text-neutral-500">
               {{ todoStore.todos.done.list.length }}
             </span>
           </template>
         </Collapsible>
-        <TodoListItem v-else :todo="(item as Todo)" />
+        <TodoListItem v-else :todo="item as Todo" />
       </template>
     </UScrollArea>
   </div>

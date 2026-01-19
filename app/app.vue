@@ -8,8 +8,7 @@ const appWindow = getCurrentWebviewWindow()
 onMounted(async () => {
   try {
     await initAllDatabases()
-  }
-  catch (error) {
+  } catch (error) {
     console.error('Failed to initialize database:', error)
   }
 })
@@ -32,14 +31,15 @@ function handleKeydown(e: KeyboardEvent) {
   }
 
   // Disable WebView keyboard shortcuts
-  const disabledShortcuts
-    = ['F5', 'F7'].includes(e.key)
-      || (e.altKey && ['ArrowLeft', 'ArrowRight'].includes(e.key))
-      || ((e.ctrlKey || e.metaKey)
-        && ['F', 'G', 'H', 'J', 'P', 'Q', 'R', 'U'].includes(
-          e.key.toUpperCase(),
-        ))
-  disabledShortcuts && e.preventDefault()
+  const disabledShortcuts =
+    ['F5', 'F7'].includes(e.key) ||
+    (e.altKey && ['ArrowLeft', 'ArrowRight'].includes(e.key)) ||
+    ((e.ctrlKey || e.metaKey) &&
+      ['F', 'G', 'H', 'J', 'P', 'Q', 'R', 'U'].includes(e.key.toUpperCase()))
+
+  if (disabledShortcuts) {
+    e.preventDefault()
+  }
 }
 
 // 屏蔽浏览器默认右键菜单

@@ -16,53 +16,53 @@ const fileIcon = computed(() => {
 
   const iconMap: Record<string, string> = {
     // 文档
-    'pdf': 'i-lucide-file-text',
-    'doc': 'i-lucide-file-text',
-    'docx': 'i-lucide-file-text',
-    'txt': 'i-lucide-file-text',
+    pdf: 'i-lucide-file-text',
+    doc: 'i-lucide-file-text',
+    docx: 'i-lucide-file-text',
+    txt: 'i-lucide-file-text',
     // 表格
-    'xls': 'i-lucide-sheet',
-    'xlsx': 'i-lucide-sheet',
-    'csv': 'i-lucide-sheet',
+    xls: 'i-lucide-sheet',
+    xlsx: 'i-lucide-sheet',
+    csv: 'i-lucide-sheet',
     // 演示
-    'ppt': 'i-lucide-presentation',
-    'pptx': 'i-lucide-presentation',
+    ppt: 'i-lucide-presentation',
+    pptx: 'i-lucide-presentation',
     // 压缩包
-    'zip': 'i-lucide-file-archive',
-    'rar': 'i-lucide-file-archive',
+    zip: 'i-lucide-file-archive',
+    rar: 'i-lucide-file-archive',
     '7z': 'i-lucide-file-archive',
-    'tar': 'i-lucide-file-archive',
-    'gz': 'i-lucide-file-archive',
+    tar: 'i-lucide-file-archive',
+    gz: 'i-lucide-file-archive',
     // 代码
-    'js': 'i-lucide-file-code',
-    'ts': 'i-lucide-file-code',
-    'jsx': 'i-lucide-file-code',
-    'tsx': 'i-lucide-file-code',
-    'vue': 'i-lucide-file-code',
-    'py': 'i-lucide-file-code',
-    'java': 'i-lucide-file-code',
-    'cpp': 'i-lucide-file-code',
-    'c': 'i-lucide-file-code',
-    'html': 'i-lucide-file-code',
-    'css': 'i-lucide-file-code',
+    js: 'i-lucide-file-code',
+    ts: 'i-lucide-file-code',
+    jsx: 'i-lucide-file-code',
+    tsx: 'i-lucide-file-code',
+    vue: 'i-lucide-file-code',
+    py: 'i-lucide-file-code',
+    java: 'i-lucide-file-code',
+    cpp: 'i-lucide-file-code',
+    c: 'i-lucide-file-code',
+    html: 'i-lucide-file-code',
+    css: 'i-lucide-file-code',
     // 图片
-    'jpg': 'i-lucide-image',
-    'jpeg': 'i-lucide-image',
-    'png': 'i-lucide-image',
-    'gif': 'i-lucide-image',
-    'svg': 'i-lucide-image',
-    'webp': 'i-lucide-image',
+    jpg: 'i-lucide-image',
+    jpeg: 'i-lucide-image',
+    png: 'i-lucide-image',
+    gif: 'i-lucide-image',
+    svg: 'i-lucide-image',
+    webp: 'i-lucide-image',
     // 音频
-    'mp3': 'i-lucide-music',
-    'wav': 'i-lucide-music',
-    'ogg': 'i-lucide-music',
-    'flac': 'i-lucide-music',
+    mp3: 'i-lucide-music',
+    wav: 'i-lucide-music',
+    ogg: 'i-lucide-music',
+    flac: 'i-lucide-music',
     // 视频
-    'mp4': 'i-lucide-video',
-    'avi': 'i-lucide-video',
-    'mov': 'i-lucide-video',
-    'mkv': 'i-lucide-video',
-    'webm': 'i-lucide-video',
+    mp4: 'i-lucide-video',
+    avi: 'i-lucide-video',
+    mov: 'i-lucide-video',
+    mkv: 'i-lucide-video',
+    webm: 'i-lucide-video',
   }
 
   return iconMap[ext || ''] || 'i-lucide-file'
@@ -80,8 +80,7 @@ async function handleClick() {
     // 本地文件,获取绝对路径后打开
     const localPath = await getLocalFilePath(path.value)
     await openPath(localPath)
-  }
-  catch (err) {
+  } catch (err) {
     console.error('打开文件失败:', err)
   }
 }
@@ -90,7 +89,7 @@ async function handleClick() {
 <template>
   <NodeViewWrapper class="my-0!">
     <div
-      class="inline-flex items-center gap-2 text-secondary-400 cursor-pointer hover:underline transition-opacity"
+      class="text-secondary-400 inline-flex cursor-pointer items-center gap-2 transition-opacity hover:underline"
       :class="{ 'bg-primary-50 dark:bg-primary-900/20': props.selected, 'opacity-60': loading }"
       :title="name"
       @click="handleClick"
@@ -98,9 +97,9 @@ async function handleClick() {
       <UIcon
         :name="loading ? 'i-lucide-loader-circle' : fileIcon"
         :class="[loading && 'animate-spin']"
-        class="text-lg shrink-0 flex items-center"
+        class="flex shrink-0 items-center text-lg"
       />
-      <span class="truncate max-w-xs leading-none">
+      <span class="max-w-xs truncate leading-none">
         {{ name }}
       </span>
     </div>

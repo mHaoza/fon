@@ -13,8 +13,7 @@ async function ensureDbDirectory() {
     if (!dirExists) {
       await mkdir(DB_DIR, { baseDir: BaseDirectory.Resource, recursive: true })
     }
-  }
-  catch (error) {
+  } catch (error) {
     console.error('Failed to create database directory:', error)
     throw error
   }

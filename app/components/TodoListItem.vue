@@ -44,19 +44,16 @@ function setActiveTodo(todoId?: number | null) {
 function getContextMenuItems(todo: Todo) {
   const items: ContextMenuItem[] = []
   if (!todo.is_deleted) {
-    items.push(
-      {
-        label: '删除',
-        icon: 'i-mdi-delete',
-        color: 'error',
-        onSelect: async () => {
-          await todoStore.deleteTodo(todo.id)
-          setActiveTodo(null)
-        },
+    items.push({
+      label: '删除',
+      icon: 'i-mdi-delete',
+      color: 'error',
+      onSelect: async () => {
+        await todoStore.deleteTodo(todo.id)
+        setActiveTodo(null)
       },
-    )
-  }
-  else {
+    })
+  } else {
     items.push(
       {
         label: '恢复',
@@ -88,8 +85,12 @@ const disabled = computed(() => {
 <template>
   <UContextMenu :items="getContextMenuItems(todo)">
     <div
-      class="todo-input px-3 rounded-md flex items-center relative transition-all cursor-pointer border"
-      :class="todoStore.activeTodoId === todo.id ? 'bg-primary-50 border-primary-200' : 'hover:bg-neutral-50 border-transparent'"
+      class="todo-input relative flex cursor-pointer items-center rounded-md border px-3 transition-all"
+      :class="
+        todoStore.activeTodoId === todo.id
+          ? 'bg-primary-50 border-primary-200'
+          : 'border-transparent hover:bg-neutral-50'
+      "
       @click="handleTodoClick($event, todo)"
     >
       <UCheckbox

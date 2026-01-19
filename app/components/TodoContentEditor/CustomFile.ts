@@ -6,8 +6,8 @@ import FileNodeComponent from './FileNode.vue'
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     file: {
-      insertFileNode: (attrs: { path?: string, name: string, loading?: boolean }) => ReturnType
-      updateFileNode: (attrs: { path?: string, name?: string, loading?: boolean }) => ReturnType
+      insertFileNode: (attrs: { path?: string; name: string; loading?: boolean }) => ReturnType
+      updateFileNode: (attrs: { path?: string; name?: string; loading?: boolean }) => ReturnType
     }
   }
 }
@@ -27,22 +27,22 @@ export default Node.create({
     return {
       path: {
         default: '',
-        parseHTML: element => element.getAttribute('data-path'),
-        renderHTML: attributes => ({
+        parseHTML: (element) => element.getAttribute('data-path'),
+        renderHTML: (attributes) => ({
           'data-path': attributes.path,
         }),
       },
       name: {
         default: '',
-        parseHTML: element => element.getAttribute('data-name'),
-        renderHTML: attributes => ({
+        parseHTML: (element) => element.getAttribute('data-name'),
+        renderHTML: (attributes) => ({
           'data-name': attributes.name,
         }),
       },
       loading: {
         default: false,
-        parseHTML: element => element.getAttribute('data-loading') === 'true',
-        renderHTML: attributes => ({
+        parseHTML: (element) => element.getAttribute('data-loading') === 'true',
+        renderHTML: (attributes) => ({
           'data-loading': attributes.loading ? 'true' : 'false',
         }),
       },
@@ -50,9 +50,11 @@ export default Node.create({
   },
 
   parseHTML() {
-    return [{
-      tag: 'div[data-type="file-node"]',
-    }]
+    return [
+      {
+        tag: 'div[data-type="file-node"]',
+      },
+    ]
   },
 
   renderHTML({ HTMLAttributes }) {
@@ -65,19 +67,23 @@ export default Node.create({
 
   addCommands() {
     return {
-      insertFileNode: attrs => ({ commands }) => {
-        return commands.insertContent({
-          type: this.name,
-          attrs: {
-            path: attrs.path || '',
-            name: attrs.name,
-            loading: attrs.loading ?? false,
-          },
-        })
-      },
-      updateFileNode: attrs => ({ commands }) => {
-        return commands.updateAttributes(this.name, attrs)
-      },
+      insertFileNode:
+        (attrs) =>
+        ({ commands }) => {
+          return commands.insertContent({
+            type: this.name,
+            attrs: {
+              path: attrs.path || '',
+              name: attrs.name,
+              loading: attrs.loading ?? false,
+            },
+          })
+        },
+      updateFileNode:
+        (attrs) =>
+        ({ commands }) => {
+          return commands.updateAttributes(this.name, attrs)
+        },
     }
   },
 

@@ -7,7 +7,10 @@ import { computed, h, nextTick, onBeforeUnmount, onMounted, resolveComponent } f
 import { useTagStore } from '~/store/tag'
 import { extractTags } from './utils'
 
-interface TagMenuItem { label: string, id: string | number }
+interface TagMenuItem {
+  label: string
+  id: string | number
+}
 
 defineOptions({ inheritAttrs: false })
 
@@ -19,7 +22,7 @@ const tagStore = useTagStore()
 
 /** 计算可用的标签列表 */
 const tagItems = computed(() => {
-  const tagList = tagStore.tagList.map(tag => ({ label: tag.name, id: tag.id || tag.name }))
+  const tagList = tagStore.tagList.map((tag) => ({ label: tag.name, id: tag.id || tag.name }))
 
   return tagList
 })
@@ -61,14 +64,16 @@ onMounted(async () => {
           tr.delete(range.from, range.to)
           return true
         })
-        // .run()
+      // .run()
 
       // 插入标签
       insertTag(editor, item as TagMenuItem)
     },
     filter: (items, query) => {
       const extractedTags = extractTags(props.editor)
-      return items.filter(item => !extractedTags.includes(item.label) && item.label.includes(query))
+      return items.filter(
+        (item) => !extractedTags.includes(item.label) && item.label.includes(query),
+      )
     },
     renderItem: (item, styles) => [
       h(UIcon, { name: 'i-heroicons-tag', class: styles.value.itemLeadingIcon() }),

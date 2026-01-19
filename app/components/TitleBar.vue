@@ -42,17 +42,17 @@ const controlList = computed(() => [
 </script>
 
 <template>
-  <div class="title-bar flex select-none items-center">
-    <div class="drag-bar pl-2 flex-1 flex items-center" data-tauri-drag-region>
-      <img src="/logo.svg" alt="logo" class="h-5 w-auto pointer-events-none">
-      <span class="text-neutral-400 font-bold pl-1 pointer-events-none">Fon</span>
+  <div class="title-bar flex items-center select-none">
+    <div class="drag-bar flex flex-1 items-center pl-2" data-tauri-drag-region>
+      <img src="/logo.svg" alt="logo" class="pointer-events-none h-5 w-auto" />
+      <span class="pointer-events-none pl-1 font-bold text-neutral-400">Fon</span>
     </div>
 
     <div class="flex">
       <div
         v-for="{ name, icon, action } in controlList"
         :key="name"
-        class="flex h-8 w-10 items-center justify-center hover:bg-neutral-100 active:bg-neutral-200 transition-all cursor-pointer"
+        class="flex h-8 w-10 cursor-pointer items-center justify-center transition-all hover:bg-neutral-100 active:bg-neutral-200"
         :aria-label="name"
         @click="action()"
       >

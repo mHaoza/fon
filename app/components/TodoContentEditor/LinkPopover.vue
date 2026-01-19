@@ -11,28 +11,30 @@ const url = ref('')
 
 const active = computed(() => props.editor.isActive('link'))
 const disabled = computed(() => {
-  if (!props.editor.isEditable)
-    return true
+  if (!props.editor.isEditable) return true
   const { selection } = props.editor.state
   return selection.empty && !props.editor.isActive('link')
 })
 
-watch(() => props.editor, (editor, _, onCleanup) => {
-  if (!editor)
-    return
+watch(
+  () => props.editor,
+  (editor, _, onCleanup) => {
+    if (!editor) return
 
-  const updateUrl = () => {
-    const { href } = editor.getAttributes('link')
-    url.value = href || ''
-  }
+    const updateUrl = () => {
+      const { href } = editor.getAttributes('link')
+      url.value = href || ''
+    }
 
-  updateUrl()
-  editor.on('selectionUpdate', updateUrl)
+    updateUrl()
+    editor.on('selectionUpdate', updateUrl)
 
-  onCleanup(() => {
-    editor.off('selectionUpdate', updateUrl)
-  })
-}, { immediate: true })
+    onCleanup(() => {
+      editor.off('selectionUpdate', updateUrl)
+    })
+  },
+  { immediate: true },
+)
 
 watch(active, (isActive) => {
   if (isActive && props.autoOpen) {
@@ -54,8 +56,7 @@ function setLink() {
   // When linking code, extend the code mark range first to select the full code
   if (hasCode && !isEmpty) {
     chain = chain.extendMarkRange('code').setLink({ href: url.value })
-  }
-  else {
+  } else {
     chain = chain.extendMarkRange('link').setLink({ href: url.value })
 
     if (isEmpty) {
@@ -81,8 +82,7 @@ function removeLink() {
 }
 
 function openLink() {
-  if (!url.value)
-    return
+  if (!url.value) return
   window.open(url.value, '_blank', 'noopener,noreferrer')
 }
 
@@ -95,10 +95,7 @@ function handleKeyDown(event: KeyboardEvent) {
 </script>
 
 <template>
-  <UPopover
-    v-model:open="open"
-    :ui="{ content: 'p-0.5' }"
-  >
+  <UPopover v-model:open="open" :ui="{ content: 'p-0.5' }">
     <UTooltip text="Link">
       <UButton
         icon="i-lucide-link"
@@ -122,7 +119,7 @@ function handleKeyDown(event: KeyboardEvent) {
         placeholder="Paste a link..."
         @keydown="handleKeyDown"
       >
-        <div class="flex items-center mr-0.5">
+        <div class="mr-0.5 flex items-center">
           <UButton
             icon="i-lucide-corner-down-left"
             variant="ghost"
@@ -132,10 +129,7 @@ function handleKeyDown(event: KeyboardEvent) {
             @click="setLink"
           />
 
-          <USeparator
-            orientation="vertical"
-            class="h-6 mx-1"
-          />
+          <USeparator orientation="vertical" class="mx-1 h-6" />
 
           <UButton
             icon="i-lucide-external-link"
