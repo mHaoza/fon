@@ -28,7 +28,7 @@ function goHome() {
 
           <div class="flex justify-center">
             <UIcon
-              name="i-heroicons-question-mark-circle"
+              name="i-lucide-circle-question-mark"
               class="h-16 w-16 text-neutral-400 dark:text-neutral-600"
             />
           </div>
@@ -43,7 +43,7 @@ function goHome() {
 
         <!-- 操作按钮 -->
         <div class="flex flex-wrap justify-center gap-3">
-          <UButton size="lg" color="neutral" icon="i-heroicons-home" @click="goHome">
+          <UButton size="lg" color="neutral" icon="i-lucide-house" @click="goHome">
             返回首页
           </UButton>
         </div>

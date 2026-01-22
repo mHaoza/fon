@@ -76,7 +76,7 @@ onMounted(async () => {
       )
     },
     renderItem: (item, styles) => [
-      h(UIcon, { name: 'i-heroicons-tag', class: styles.value.itemLeadingIcon() }),
+      h(UIcon, { name: 'i-lucide-tag', class: styles.value.itemLeadingIcon() }),
       h('span', { class: styles.value.itemLabel() }, item.label),
     ],
   })
