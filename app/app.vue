@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow'
+import { zh_cn } from '@nuxt/ui/locale'
 import { initAllDatabases } from '~/db'
 
 const appWindow = getCurrentWebviewWindow()
@@ -54,7 +55,7 @@ function handleContextmenu(e: MouseEvent) {
 </script>
 
 <template>
-  <UApp>
+  <UApp :locale="zh_cn">
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>

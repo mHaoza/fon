@@ -138,6 +138,8 @@ async function handlePaste(event: ClipboardEvent) {
   }
 }
 
+const bodyElement = computed(() => document.body)
+
 defineExpose({ focus: () => editorRef.value?.editor?.commands.focus('end') })
 </script>
 
@@ -226,7 +228,11 @@ defineExpose({ focus: () => editorRef.value?.editor?.commands.focus('end') })
           }
         "
       />
-      <UEditorSuggestionMenu :editor="editor" :items="suggestionItems" />
+      <UEditorSuggestionMenu
+        :editor="editor"
+        :items="suggestionItems"
+        :append-to="() => bodyElement"
+      />
       <UEditorDragHandle :editor="editor" />
     </UEditor>
   </div>
