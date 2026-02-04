@@ -1,15 +1,19 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "fon",
-  "version": "0.0.5-beta.4",
+  "version": "0.0.6-beta.4",
   "identifier": "fun.iice.fon",
   "app": {
     "windows": [],
     "security": {
-      "capabilities": ["default-capability"],
+      "capabilities": [
+        "default-capability"
+      ],
       "assetProtocol": {
         "enable": true,
-        "scope": ["*/**"]
+        "scope": [
+          "*/**"
+        ]
       },
       "csp": null,
       "dangerousDisableAssetCspModification": true
@@ -24,15 +28,7 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ],
-    "windows": {
-      "webviewInstallMode": {
-        "type": "offlineInstaller"
-      },
-      "nsis": {
-        "installerIcon": "icons/icon.ico"
-      }
-    }
+    ]
   },
   "build": {
     "beforeBuildCommand": "pnpm run web:generate",

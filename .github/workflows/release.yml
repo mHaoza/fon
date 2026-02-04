@@ -1,0 +1,261 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+# 仅赋予必要的权限，遵循最小权限原则
+permissions:
+  contents: read
+
+jobs:
+  check-release:
+    runs-on: ubuntu-latest
+    outputs:
+      should_release: ${{ steps.parse.outputs.should_release }}
+      version: ${{ steps.parse.outputs.version }}
+      tag_name: ${{ steps.parse.outputs.tag_name }}
+      is_prerelease: ${{ steps.parse.outputs.is_prerelease }}
+      changelog: ${{ steps.parse.outputs.changelog }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Parse release commit
+        id: parse
+        shell: bash
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          echo "Commit: $COMMIT_MSG"
+
+          # 正则匹配 release: vX.Y.Z-suffix 格式
+          REGEX="^release:[[:space:]]*(v?)([0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9._]+)*)"
+
+          if [[ "$COMMIT_MSG" =~ $REGEX ]]; then
+            VERSION="${BASH_REMATCH[2]}"
+            PREFIX="${BASH_REMATCH[1]}"
+            
+            # 统一处理 v 前缀
+            [[ "$PREFIX" == "v" ]] && TAG_NAME="v$VERSION" || TAG_NAME="v$VERSION"
+            
+            # 检测是否为预发布版本
+            [[ "$VERSION" =~ -(alpha|beta|rc|dev|preview) ]] && IS_PRERELEASE="true" || IS_PRERELEASE="false"
+            
+            # 生成 Changelog
+            # 从 HEAD^ 查找最近的 tag，获取变更记录
+            LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+            if [ -z "$LAST_TAG" ]; then
+              echo "📝 No previous tag found, getting full history"
+              CHANGELOG=$(git log --pretty=format:"- %s (%h)" | grep -v "^- release:" || true)
+            else
+              echo "📝 Generating changelog from $LAST_TAG to HEAD"
+              CHANGELOG=$(git log "${LAST_TAG}..HEAD" --pretty=format:"- %s (%h)" | grep -v "^- release:" || true)
+            fi
+            
+            echo "should_release=true" >> $GITHUB_OUTPUT
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+            echo "is_prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
+            
+            echo "changelog<<EOF" >> $GITHUB_OUTPUT
+            echo "$CHANGELOG" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            
+            echo "✅ Release detected: $TAG_NAME (pre-release: $IS_PRERELEASE)"
+          else
+            echo "should_release=false" >> $GITHUB_OUTPUT
+            echo "⏭️ Skipping: Not a release commit"
+          fi
+
+  create-release:
+    needs: check-release
+    if: needs.check-release.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ needs.check-release.outputs.tag_name }}
+          NOTES: ${{ needs.check-release.outputs.changelog }}
+          IS_PRERELEASE: ${{ needs.check-release.outputs.is_prerelease }}
+        run: |
+          # 尝试创建 Release，如果已存在则忽略错误（支持重试）
+          gh release create "$TAG_NAME" \
+            --title "$TAG_NAME" \
+            --notes "$NOTES" \
+            --prerelease="$IS_PRERELEASE" \
+            --target main || echo "⚠️ Release $TAG_NAME might already exist"
+
+  release:
+    needs: [check-release, create-release]
+    if: needs.check-release.outputs.should_release == 'true'
+    permissions:
+      contents: write
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: 'pnpm'
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Install project dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Configure Tauri (Standard)
+        shell: pwsh
+        run: |
+          echo "⚙️ Using Standard Config (tauri.windows.conf.json)..."
+          # 默认仓库中已包含 tauri.windows.conf.json (设置为 DownloadBootstrapper)
+
+      - name: Build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm tauri build
+
+      - name: Upload Release Assets
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.check-release.outputs.tag_name }}
+          VERSION: ${{ needs.check-release.outputs.version }}
+        run: |
+          $NSIS_DIR = "src-tauri/target/release/bundle/nsis"
+
+          # 获取所有相关文件 (.exe, .nsis.zip, .sig)
+          $SetupFiles = Get-ChildItem "$NSIS_DIR/*" -Include "*-setup.exe", "*-setup.nsis.zip", "*-setup.nsis.zip.sig"
+
+          if ($SetupFiles.Count -gt 0) {
+             foreach ($File in $SetupFiles) {
+                echo "⬆️ Uploading $($File.Name)..."
+                gh release upload $env:TAG $File.FullName --clobber
+             }
+          } else {
+             Write-Error "❌ Setup files not found in $NSIS_DIR"
+             exit 1
+          }
+
+      - name: Upload Portable Zip
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.check-release.outputs.tag_name }}
+          VERSION: ${{ needs.check-release.outputs.version }}
+        run: |
+          $EXE_PATH = "src-tauri/target/release/fon.exe"
+          $ZIP_NAME = "fon_$($env:VERSION)_x64.zip"
+
+          if (Test-Path $EXE_PATH) {
+            echo "📦 Compressing to $ZIP_NAME..."
+            Compress-Archive -Path $EXE_PATH -DestinationPath $ZIP_NAME
+            
+            echo "⬆️ Uploading Zip..."
+            gh release upload $env:TAG $ZIP_NAME --clobber
+          }
+
+  release-for-fixed-webview2:
+    needs: [check-release, create-release]
+    if: needs.check-release.outputs.should_release == 'true'
+    permissions:
+      contents: write
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: 'pnpm'
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Install project dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download WebView2 Runtime
+        shell: pwsh
+        run: |
+          $WbvVer = "109.0.1518.78"
+          $Arch = "x64"
+          $FileName = "Microsoft.WebView2.FixedVersionRuntime.$WbvVer.$Arch.cab"
+          $Url = "https://github.com/westinyang/WebView2RuntimeArchive/releases/download/$WbvVer/$FileName"
+          $Dest = "$FileName"
+
+          echo "⬇️ Downloading WebView2 Fixed Runtime ($WbvVer)..."
+          Invoke-WebRequest -Uri $Url -OutFile $Dest
+
+          echo "📦 Extracting to ./src-tauri/Microsoft.WebView2.FixedVersionRuntime.$WbvVer.$Arch/ ..."
+          $ExtractPath = "./src-tauri/Microsoft.WebView2.FixedVersionRuntime.$WbvVer.$Arch"
+          New-Item -ItemType Directory -Force -Path $ExtractPath | Out-Null
+
+          # 使用 expand.exe (-F:* 提取所有文件)
+          expand $Dest -F:* $ExtractPath
+
+      - name: Configure Tauri (Switch to Fixed WebView2)
+        shell: pwsh
+        run: |
+          echo "⚙️ Switching to Offline Config (webview2.x64.json)..."
+          Remove-Item "src-tauri/tauri.windows.conf.json" -ErrorAction SilentlyContinue
+          Copy-Item "src-tauri/webview2.x64.json" "src-tauri/tauri.windows.conf.json"
+
+      - name: Build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm tauri build
+
+      - name: Rename and Upload Assets
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.check-release.outputs.tag_name }}
+          SUFFIX: '-fixed-webview2'
+        run: |
+          $NSIS_DIR = "src-tauri/target/release/bundle/nsis"
+          # 仅上传 setup 相关文件
+          $SetupFiles = Get-ChildItem "$NSIS_DIR/*" -Include "*-setup.exe", "*-setup.nsis.zip", "*-setup.nsis.zip.sig"
+
+          if ($SetupFiles.Count -gt 0) {
+             foreach ($File in $SetupFiles) {
+                # 简单的替换逻辑：把 "-setup" 替换为 "_fixed_webview2-setup" (Clash 风格)
+                # 例如: fon_0.0.6_x64-setup.exe -> fon_0.0.6_x64_fixed_webview2-setup.exe
+                $NewName = $File.Name.Replace("-setup", "_fixed_webview2-setup")
+                $NewPath = Join-Path $NSIS_DIR $NewName
+                
+                Rename-Item -Path $File.FullName -NewName $NewName
+                
+                echo "⬆️ Uploading $NewName..."
+                gh release upload $env:TAG $NewPath --clobber
+             }
+          } else {
+             Write-Error "❌ Setup files not found"
+             exit 1
+          }
