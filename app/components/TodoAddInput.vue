@@ -13,6 +13,12 @@ const route = useRoute()
 const todoStore = useTodoStore()
 const todoInput = useTemplateRef('todoInput')
 const todo = ref<TodoCreate>(getDefaultTodoData())
+const isFocused = ref(false)
+
+const todoAddInput = useTemplateRef('todoAddInput')
+onClickOutside(todoAddInput, () => {
+  isFocused.value = false
+})
 
 function getDefaultTodoData(): TodoCreate {
   return {
@@ -75,11 +81,13 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="todo-input mx-2 mb-2 flex items-center rounded-md border px-3 py-1 transition-all"
+    ref="todoAddInput"
+    class="todo-input z-99 mx-2 mb-2 flex items-center rounded-md border px-3 py-1 transition-all"
     :class="{
-      'border-primary bg-white': todoInput?.isFocused,
-      'border-neutral-200 bg-neutral-50': !todoInput?.isFocused,
+      'border-primary bg-white': isFocused,
+      'border-neutral-200 bg-neutral-50': !isFocused,
     }"
+    @click="() => (isFocused = true)"
   >
     <TodoTitleInput
       ref="todoInput"
@@ -87,9 +95,10 @@ onUnmounted(() => {
       :placeholder="props.placeholder"
       class="flex-1"
       @enter="addTodo"
+      @focus="() => (isFocused = true)"
     />
 
-    <div class="flex items-center" />
+    <TodoCalendar v-if="isFocused || todo.title" v-model="todo" :portal="todoAddInput" />
   </div>
 </template>
 

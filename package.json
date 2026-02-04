@@ -28,6 +28,7 @@
     "@tauri-apps/plugin-opener": "^2.5.3",
     "@tauri-apps/plugin-sql": "^2.3.2",
     "@tiptap/extension-table": "^3.18.0",
+    "@vueuse/nuxt": "14.1.0",
     "dayjs": "^1.11.19",
     "lodash-es": "^4.17.23",
     "nanoid": "^5.1.6",

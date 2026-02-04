@@ -17,7 +17,7 @@ export default defineNuxtConfig({
       include: ['prosemirror-state', 'prosemirror-tables', 'prosemirror-view'],
     },
   },
-  modules: ['@pinia/nuxt', '@nuxt/ui'],
+  modules: ['@pinia/nuxt', '@nuxt/ui', '@vueuse/nuxt'],
   // 配置自动导入
   imports: {
     dirs: ['utils/*'],

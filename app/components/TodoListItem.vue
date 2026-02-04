@@ -110,6 +110,11 @@ const disabled = computed(() => {
         @blur="updateTodoTitle(todo)"
       />
       <TagView :tag-list="todo.tags" :max-tag-count="2" />
+      <TodoCalendar
+        v-model="todo"
+        hide-icon
+        @update="todoStore.updateTodo({ id: todo.id, date: todo.date })"
+      />
     </div>
   </UContextMenu>
 </template>

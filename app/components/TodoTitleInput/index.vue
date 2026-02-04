@@ -42,7 +42,6 @@ const extensions = computed(() => {
 })
 
 const editorRef = useTemplateRef('editorRef')
-const isFocused = ref(false)
 
 const editorProps = {
   handleKeyDown: (_: any, event: KeyboardEvent) => {
@@ -75,7 +74,6 @@ function setContent(newContent: string) {
 }
 
 defineExpose({
-  isFocused,
   focus,
   setContent,
   getTags: () => {
@@ -120,18 +118,8 @@ defineExpose({
     :editable="props.editable"
     autofocus
     class="max-h-21 w-full overflow-auto"
-    @focus="
-      () => {
-        isFocused = true
-        emit('focus')
-      }
-    "
-    @blur="
-      () => {
-        isFocused = false
-        emit('blur')
-      }
-    "
+    @focus="() => emit('focus')"
+    @blur="() => emit('blur')"
   >
     <template #default="{ editor }">
       <TodoTitleInputTagMenu v-if="tagEnabled" :editor="editor" char="#" />

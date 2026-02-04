@@ -30,9 +30,18 @@ function handleContentClick(e: PointerEvent) {
       <UCheckbox
         v-model="checked"
         color="secondary"
-        class="mr-2 pl-5"
+        class="mr-1 pl-5"
         :disabled="!!todoStore.activeTodo?.is_deleted"
         @click.stop
+      />
+      <USeparator orientation="vertical" color="neutral" class="mx-2" />
+      <TodoCalendar
+        v-model="todoStore.activeTodo"
+        placeholder="设置日期"
+        :popover-content="{ side: 'bottom', align: 'start', alignOffset: -100 }"
+        @update="
+          todoStore.updateTodo({ id: todoStore.activeTodo.id, date: todoStore.activeTodo.date })
+        "
       />
     </div>
     <USeparator color="neutral" />
@@ -47,10 +56,7 @@ function handleContentClick(e: PointerEvent) {
         base: 'text-xl font-semibold w-full pl-7',
       }"
       @blur="
-        todoStore.updateTodo({
-          id: todoStore.activeTodo.id,
-          title: todoStore.activeTodo.title,
-        })
+        todoStore.updateTodo({ id: todoStore.activeTodo.id, title: todoStore.activeTodo.title })
       "
     />
     <div
