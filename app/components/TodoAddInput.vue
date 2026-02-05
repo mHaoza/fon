@@ -20,6 +20,8 @@ onClickOutside(todoAddInput, () => {
   isFocused.value = false
 })
 
+const hasTitle = computed(() => todo.value.title?.replace(/\s|&nbsp;/g, '').length > 0)
+
 function getDefaultTodoData(): TodoCreate {
   return {
     title: '',
@@ -97,8 +99,7 @@ onUnmounted(() => {
       @enter="addTodo"
       @focus="() => (isFocused = true)"
     />
-
-    <TodoCalendar v-if="isFocused || todo.title" v-model="todo" :portal="todoAddInput" />
+    <TodoCalendar v-if="isFocused || hasTitle" v-model="todo" :portal="todoAddInput" />
   </div>
 </template>
 
