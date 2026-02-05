@@ -20,7 +20,7 @@ const list = computed(() => {
 </script>
 
 <template>
-  <div class="flex h-full flex-col border-r border-neutral-200">
+  <div class="flex h-full flex-col">
     <div class="p-3 text-xl font-semibold text-neutral-800">所有</div>
     <TodoAddInput />
 

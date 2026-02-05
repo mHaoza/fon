@@ -75,7 +75,7 @@ pub fn create_main_window() {
         )
         .title("main") // 窗口标题
         .inner_size(1200.0, 800.0) // 窗口大小
-        // .min_inner_size(900.0, 700.0) // 最小窗口大小
+        .min_inner_size(720.0, 480.0) // 最小窗口大小
         .decorations(false) // 是否有边框
         .maximizable(true) // 最大化
         .transparent(true) // 透明

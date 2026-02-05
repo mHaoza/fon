@@ -89,7 +89,6 @@ const dateIcon = (content: string) => {
 }
 
 const buttonIcon = computed(() => {
-  console.log('hideIcon', props.hideIcon)
   if (props.hideIcon) {
     return ''
   }

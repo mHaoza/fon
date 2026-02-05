@@ -73,9 +73,9 @@ const TodoNavbarItem = defineComponent({
             : 'text-neutral-700 hover:bg-neutral-50',
         ]}
       >
-        <UIcon name={props.icon} class="text-current" />
-        <div class="flex-1 text-sm">{props.label}</div>
-        <div class="sidebar-item-extra">{slots.extra?.()}</div>
+        <UIcon name={props.icon} class="shrink-0 text-current" />
+        <div class="min-w-0 flex-1 truncate text-sm">{props.label}</div>
+        <div class="sidebar-item-extra shrink-0">{slots.extra?.()}</div>
       </div>
     )
   },
@@ -83,7 +83,7 @@ const TodoNavbarItem = defineComponent({
 </script>
 
 <template>
-  <div class="w-46 border-r border-neutral-200 p-3">
+  <div class="py-3">
     <!-- 基础分组 -->
     <TodoNavbarItem label="所有" value="all" icon="i-mdi-view-grid-outline" @click="go('all')" />
     <USeparator color="neutral" class="my-3" />
