@@ -15,8 +15,7 @@
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
     "postinstall": "nuxt prepare",
-    "release-version": "node scripts/release-version.mjs",
-    "publish-version": "node scripts/publish-version.mjs"
+    "release-version": "node scripts/release-version.mjs"
   },
   "dependencies": {
     "@nuxt/ui": "4.4.0",
