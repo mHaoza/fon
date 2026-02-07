@@ -204,7 +204,7 @@ jobs:
       - name: Download WebView2 Runtime
         shell: pwsh
         run: |
-          $WbvVer = "109.0.1518.78"
+          $WbvVer = "133.0.3065.92"
           $Arch = "x64"
           $FileName = "Microsoft.WebView2.FixedVersionRuntime.$WbvVer.$Arch.cab"
           $Url = "https://github.com/westinyang/WebView2RuntimeArchive/releases/download/$WbvVer/$FileName"
@@ -213,12 +213,26 @@ jobs:
           echo "⬇️ Downloading WebView2 Fixed Runtime ($WbvVer)..."
           Invoke-WebRequest -Uri $Url -OutFile $Dest
 
-          echo "📦 Extracting to ./src-tauri/Microsoft.WebView2.FixedVersionRuntime.$WbvVer.$Arch/ ..."
-          $ExtractPath = "./src-tauri/Microsoft.WebView2.FixedVersionRuntime.$WbvVer.$Arch"
-          New-Item -ItemType Directory -Force -Path $ExtractPath | Out-Null
+          echo "📦 Extracting..."
+          $TempDir = "temp_webview2"
+          New-Item -ItemType Directory -Force -Path $TempDir | Out-Null
+          expand $Dest -F:* $TempDir
 
-          # 使用 expand.exe (-F:* 提取所有文件)
-          expand $Dest -F:* $ExtractPath
+          echo "🔍 Finding runtime root..."
+          $RuntimeExe = Get-ChildItem -Path $TempDir -Filter "msedgewebview2.exe" -Recurse | Select-Object -First 1
+          if ($null -eq $RuntimeExe) { Write-Error "❌ msedgewebview2.exe not found"; exit 1 }
+
+          $RealRuntimeDir = $RuntimeExe.Directory.FullName
+          $TargetDir = "src-tauri/Microsoft.WebView2.FixedVersionRuntime.$WbvVer.$Arch"
+
+          echo "✅ Runtime found at: $RealRuntimeDir"
+          echo "🚚 Moving to: $TargetDir"
+
+          if (Test-Path $TargetDir) { Remove-Item -Path $TargetDir -Recurse -Force }
+          Move-Item -Path $RealRuntimeDir -Destination $TargetDir
+
+          Remove-Item -Path $TempDir -Recurse -Force
+          Remove-Item -Path $Dest -Force
 
       - name: Configure Tauri (Switch to Fixed WebView2)
         shell: pwsh
